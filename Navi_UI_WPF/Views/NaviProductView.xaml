@@ -1,0 +1,162 @@
+<UserControl x:Class="Navi_UI_WPF.Views.NaviProductView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
+             xmlns:conv="clr-namespace:Navi_UI_WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="750" d:DesignWidth="1100"
+             Background="{StaticResource BackgroundBrush}">
+    <UserControl.DataContext>
+        <vm:NaviProductViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <!-- ── Toolbar ─────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Style="{StaticResource Toolbar}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="📦 Sản phẩm" Style="{StaticResource PageTitle}" Margin="0,0,16,0"/>
+
+                <TextBox Grid.Column="1" Style="{StaticResource InputCompact}"
+                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,6,0">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <TextBlock Grid.Column="2" Text="{Binding StatusMessage}"
+                           FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                           VerticalAlignment="Center" Margin="8,0"/>
+
+                <Button Grid.Column="3" Content="🔍" Style="{StaticResource BtnGhost}"
+                        Command="{Binding SearchCommand}" Margin="0,0,6,0" Padding="10,5"/>
+                <Button Grid.Column="4" Content="📥 Excel" Style="{StaticResource BtnSuccess}"
+                        Margin="0,0,6,0"/>
+                <Button Grid.Column="5" Content="+ Thêm" Style="{StaticResource BtnPrimary}"
+                        Command="{Binding AddCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- ── Body ───────────────────────────────────────────────────── -->
+        <Grid Grid.Row="1" Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="{Binding IsDetailVisible, Converter={StaticResource BoolToVis}, ConverterParameter=300}"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Table card -->
+            <Border Style="{StaticResource Card}" Margin="0,0,8,0">
+                <DataGrid Style="{StaticResource CompactGrid}"
+                          ItemsSource="{Binding Products}"
+                          SelectedItem="{Binding SelectedProduct}"
+                          ColumnHeaderStyle="{StaticResource GridHeader}"
+                          RowStyle="{StaticResource GridRow}">
+                    <DataGrid.InputBindings>
+                        <MouseBinding MouseAction="LeftClick"
+                                      Command="{Binding SelectProductCommand}"
+                                      CommandParameter="{Binding SelectedProduct, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                    </DataGrid.InputBindings>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="55" IsReadOnly="True"
+                                            ElementStyle="{StaticResource CellTextMuted}"/>
+                        <DataGridTextColumn Header="TÊN SẢN PHẨM" Binding="{Binding ProductName}" Width="*" IsReadOnly="True"
+                                            ElementStyle="{StaticResource CellTextBold}"/>
+                        <DataGridTextColumn Header="MÔ TẢ" Binding="{Binding Description}" Width="2*" IsReadOnly="True"
+                                            ElementStyle="{StaticResource CellTextMuted}"/>
+                        <DataGridTextColumn Header="NGÀY TẠO" Binding="{Binding Cdt, StringFormat=dd/MM/yyyy}" Width="100" IsReadOnly="True"
+                                            ElementStyle="{StaticResource CellTextMuted}"/>
+                        <DataGridTemplateColumn Header="" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Button Style="{StaticResource BtnIcon}" Content="✏️"
+                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Style="{StaticResource BtnIcon}" Content="🗑️" Foreground="#E53935"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Detail drawer -->
+            <Border Grid.Column="1" Style="{StaticResource Drawer}"
+                    Visibility="{Binding IsDetailVisible, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Drawer header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource SectionTitle}">
+                                    <Setter Property="Text" Value="Chi tiết sản phẩm"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                            <Setter Property="Text" Value="Chỉnh sửa sản phẩm"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button Style="{StaticResource BtnIcon}" HorizontalAlignment="Right"
+                                Content="✕" Foreground="{StaticResource TextMutedBrush}"
+                                Command="{Binding ClearSelectionCommand}"/>
+                    </Grid>
+
+                    <!-- Form -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="Tên sản phẩm" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding EditProductName, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputCompact}" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Mô tả" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputCompact}" Height="60"
+                                     TextWrapping="Wrap" AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Actions -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="Hủy" Style="{StaticResource BtnGhost}" Margin="0,0,6,0"
+                                Command="{Binding ClearSelectionCommand}"/>
+                        <Button Content="Lưu" Style="{StaticResource BtnPrimary}"
+                                Command="{Binding SaveCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

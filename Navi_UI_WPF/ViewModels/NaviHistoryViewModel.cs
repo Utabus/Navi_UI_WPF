@@ -1,0 +1,320 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+using Navi_UI_WPF.Commands;
+using Navi.Application.DTOs;
+
+namespace Navi_UI_WPF.ViewModels
+{
+    /// <summary>
+    /// ViewModel quản lý lịch sử thao tác nhân viên (NaviHistory)
+    /// </summary>
+    public class NaviHistoryViewModel : ViewModelBase
+    {
+        public NaviHistoryViewModel()
+        {
+            HistoryRecords = new ObservableCollection<NaviHistoryDto>();
+            AvailableTypes = new ObservableCollection<string> { "SCAN", "CHECK", "CONFIRM", "REWORK", "REJECT" };
+            LoadSampleData();
+
+            LoadAllCommand = new RelayCommand(o => LoadAll());
+            FilterByCodeNVCommand = new RelayCommand(o => ExecuteFilterByCodeNV());
+            FilterByPOCommand = new RelayCommand(o => ExecuteFilterByPO());
+            FilterByProductItemCommand = new RelayCommand(o => ExecuteFilterByProductItem());
+            ClearFilterCommand = new RelayCommand(o => ClearFilters());
+            AddCommand = new RelayCommand(o => OpenAddDialog());
+            EditCommand = new RelayCommand(o => OpenEditDialog(o as NaviHistoryDto), o => SelectedRecord != null);
+            DeleteCommand = new RelayCommand(o => ExecuteDelete(o as NaviHistoryDto), o => SelectedRecord != null);
+            SelectRecordCommand = new RelayCommand(o => SelectRecord(o as NaviHistoryDto));
+            SaveCommand = new RelayCommand(o => ExecuteSave());
+            CancelEditCommand = new RelayCommand(o => { IsDetailVisible = false; SelectedRecord = null; });
+        }
+
+        // ── Collections & Selection ──────────────────────────────────────
+
+        private ObservableCollection<NaviHistoryDto> _historyRecords;
+        public ObservableCollection<NaviHistoryDto> HistoryRecords
+        {
+            get => _historyRecords;
+            set => SetProperty(ref _historyRecords, value);
+        }
+
+        private NaviHistoryDto _selectedRecord;
+        public NaviHistoryDto SelectedRecord
+        {
+            get => _selectedRecord;
+            set => SetProperty(ref _selectedRecord, value);
+        }
+
+        private ObservableCollection<string> _availableTypes;
+        public ObservableCollection<string> AvailableTypes
+        {
+            get => _availableTypes;
+            set => SetProperty(ref _availableTypes, value);
+        }
+
+        // ── Filter Fields ────────────────────────────────────────────────
+
+        private string _filterCodeNV;
+        public string FilterCodeNV
+        {
+            get => _filterCodeNV;
+            set => SetProperty(ref _filterCodeNV, value);
+        }
+
+        private string _filterPO;
+        public string FilterPO
+        {
+            get => _filterPO;
+            set => SetProperty(ref _filterPO, value);
+        }
+
+        private string _filterProductItemId;
+        public string FilterProductItemId
+        {
+            get => _filterProductItemId;
+            set => SetProperty(ref _filterProductItemId, value);
+        }
+
+        // ── Summary Cards ────────────────────────────────────────────────
+
+        private int _totalCount;
+        public int TotalCount
+        {
+            get => _totalCount;
+            set => SetProperty(ref _totalCount, value);
+        }
+
+        private int _uniqueEmployeeCount;
+        public int UniqueEmployeeCount
+        {
+            get => _uniqueEmployeeCount;
+            set => SetProperty(ref _uniqueEmployeeCount, value);
+        }
+
+        private int _activePOCount;
+        public int ActivePOCount
+        {
+            get => _activePOCount;
+            set => SetProperty(ref _activePOCount, value);
+        }
+
+        // ── UI State ─────────────────────────────────────────────────────
+
+        private bool _isDetailVisible;
+        public bool IsDetailVisible
+        {
+            get => _isDetailVisible;
+            set => SetProperty(ref _isDetailVisible, value);
+        }
+
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
+        private string _statusMessage;
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set => SetProperty(ref _statusMessage, value);
+        }
+
+        // ── Form Fields ──────────────────────────────────────────────────
+
+        private string _editNameNV;
+        public string EditNameNV
+        {
+            get => _editNameNV;
+            set => SetProperty(ref _editNameNV, value);
+        }
+
+        private string _editCodeNV;
+        public string EditCodeNV
+        {
+            get => _editCodeNV;
+            set => SetProperty(ref _editCodeNV, value);
+        }
+
+        private string _editPO;
+        public string EditPO
+        {
+            get => _editPO;
+            set => SetProperty(ref _editPO, value);
+        }
+
+        private string _editStep;
+        public string EditStep
+        {
+            get => _editStep;
+            set => SetProperty(ref _editStep, value);
+        }
+
+        private string _editType;
+        public string EditType
+        {
+            get => _editType;
+            set => SetProperty(ref _editType, value);
+        }
+
+        private int? _editCount;
+        public int? EditCount
+        {
+            get => _editCount;
+            set => SetProperty(ref _editCount, value);
+        }
+
+        private bool _isEditMode;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set => SetProperty(ref _isEditMode, value);
+        }
+
+        // ── Commands ─────────────────────────────────────────────────────
+
+        public ICommand LoadAllCommand { get; }
+        public ICommand FilterByCodeNVCommand { get; }
+        public ICommand FilterByPOCommand { get; }
+        public ICommand FilterByProductItemCommand { get; }
+        public ICommand ClearFilterCommand { get; }
+        public ICommand AddCommand { get; }
+        public ICommand EditCommand { get; }
+        public ICommand DeleteCommand { get; }
+        public ICommand SelectRecordCommand { get; }
+        public ICommand SaveCommand { get; }
+        public ICommand CancelEditCommand { get; }
+
+        // ── Handlers ─────────────────────────────────────────────────────
+
+        private void LoadAll()
+        {
+            FilterCodeNV = ""; FilterPO = ""; FilterProductItemId = "";
+            UpdateSummary();
+            StatusMessage = $"Tải thành công {HistoryRecords.Count} bản ghi";
+        }
+
+        private void ExecuteFilterByCodeNV()
+        {
+            if (string.IsNullOrWhiteSpace(FilterCodeNV)) return;
+            StatusMessage = $"Lọc theo mã NV: {FilterCodeNV}";
+            // TODO: gọi INaviHistoryService.GetByCodeNVAsync(FilterCodeNV)
+        }
+
+        private void ExecuteFilterByPO()
+        {
+            if (string.IsNullOrWhiteSpace(FilterPO)) return;
+            StatusMessage = $"Lọc theo PO: {FilterPO}";
+            // TODO: gọi INaviHistoryService.GetByPOAsync(FilterPO)
+        }
+
+        private void ExecuteFilterByProductItem()
+        {
+            if (string.IsNullOrWhiteSpace(FilterProductItemId)) return;
+            StatusMessage = $"Lọc theo ProductItem: {FilterProductItemId}";
+            // TODO: gọi INaviHistoryService.GetByProductItemAsync
+        }
+
+        private void ClearFilters()
+        {
+            FilterCodeNV = ""; FilterPO = ""; FilterProductItemId = "";
+            StatusMessage = "Đã xóa bộ lọc";
+        }
+
+        private void OpenAddDialog()
+        {
+            IsEditMode = false;
+            EditNameNV = ""; EditCodeNV = ""; EditPO = ""; EditStep = ""; EditType = "SCAN"; EditCount = 1;
+            IsDetailVisible = true;
+            SelectedRecord = null;
+            StatusMessage = "Ghi log thao tác mới";
+        }
+
+        private void OpenEditDialog(NaviHistoryDto record)
+        {
+            if (record == null) return;
+            IsEditMode = true;
+            EditNameNV = record.NameNV;
+            EditCodeNV = record.CodeNV;
+            EditPO = record.PO;
+            EditStep = record.Step;
+            EditType = record.Type;
+            EditCount = record.Count;
+            IsDetailVisible = true;
+            StatusMessage = $"Chỉnh sửa: #{record.Id}";
+        }
+
+        private void ExecuteSave()
+        {
+            if (IsEditMode && SelectedRecord != null)
+            {
+                SelectedRecord.NameNV = EditNameNV;
+                SelectedRecord.CodeNV = EditCodeNV;
+                SelectedRecord.PO = EditPO;
+                SelectedRecord.Step = EditStep;
+                SelectedRecord.Type = EditType;
+                SelectedRecord.Count = EditCount;
+                StatusMessage = $"Đã cập nhật record #{SelectedRecord.Id}";
+            }
+            else
+            {
+                var newRecord = new NaviHistoryDto
+                {
+                    Id = HistoryRecords.Count + 1,
+                    NameNV = EditNameNV, CodeNV = EditCodeNV,
+                    PO = EditPO, Step = EditStep, Type = EditType, Count = EditCount,
+                    Cdt = DateTime.Now, Udt = DateTime.Now
+                };
+                HistoryRecords.Insert(0, newRecord);
+                StatusMessage = $"Đã thêm record mới #{newRecord.Id}";
+            }
+            IsDetailVisible = false;
+            UpdateSummary();
+        }
+
+        private void ExecuteDelete(NaviHistoryDto record)
+        {
+            if (record == null) return;
+            HistoryRecords.Remove(record);
+            SelectedRecord = null;
+            IsDetailVisible = false;
+            StatusMessage = $"Đã xóa record #{record.Id}";
+            UpdateSummary();
+        }
+
+        private void SelectRecord(NaviHistoryDto record)
+        {
+            if (record == null) return;
+            SelectedRecord = record;
+            IsDetailVisible = true;
+            EditNameNV = record.NameNV; EditCodeNV = record.CodeNV;
+            EditPO = record.PO; EditStep = record.Step;
+            EditType = record.Type; EditCount = record.Count;
+            IsEditMode = false;
+            StatusMessage = $"Xem chi tiết: #{record.Id} — {record.NameNV}";
+        }
+
+        private void UpdateSummary()
+        {
+            TotalCount = HistoryRecords.Count;
+            // Simplified counts for demo
+            UniqueEmployeeCount = 3;
+            ActivePOCount = 2;
+        }
+
+        // ── Sample Data ──────────────────────────────────────────────────
+
+        private void LoadSampleData()
+        {
+            HistoryRecords.Add(new NaviHistoryDto { Id = 1, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-001", Step = "3", Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddHours(-2), Udt = DateTime.Now.AddHours(-2) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 2, NameNV = "Trần Thị B", CodeNV = "NV002", PO = "PO-2025-001", Step = "1", Type = "CHECK", Count = 2, Cdt = DateTime.Now.AddHours(-1), Udt = DateTime.Now.AddHours(-1) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 3, NameNV = "Lê Văn C", CodeNV = "NV003", PO = "PO-2025-002", Step = "2", Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddMinutes(-30), Udt = DateTime.Now.AddMinutes(-30) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 4, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-002", Step = "4", Type = "CONFIRM", Count = 1, Cdt = DateTime.Now.AddMinutes(-10), Udt = DateTime.Now.AddMinutes(-10) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 5, NameNV = "Phạm Thị D", CodeNV = "NV004", PO = "PO-2025-003", Step = "1", Type = "SCAN", Count = 3, Cdt = DateTime.Now.AddMinutes(-5), Udt = DateTime.Now.AddMinutes(-5) });
+            UpdateSummary();
+            StatusMessage = $"Tải thành công {HistoryRecords.Count} bản ghi";
+        }
+    }
+}

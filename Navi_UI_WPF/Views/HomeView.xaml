@@ -1,0 +1,50 @@
+<UserControl x:Class="Navi_UI_WPF.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Navi_UI_WPF.Views"
+             xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="#FAFAFA">
+    
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="🏠" FontSize="60" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <TextBlock Text="Chào mừng đến với Hệ thống NAVI" 
+                       FontSize="32" 
+                       FontWeight="Bold" 
+                       Foreground="#1565C0"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+            <TextBlock Text="Chọn một tính năng từ menu bên trái để bắt đầu." 
+                       FontSize="18" 
+                       Foreground="#757575"
+                       HorizontalAlignment="Center"/>
+            
+            <!-- Quick Actions Demo -->
+            <WrapPanel Margin="0,40,0,0" HorizontalAlignment="Center">
+                <Border Width="200" Height="120" Background="White" CornerRadius="8" Margin="10" Padding="15">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#DDDDDD" Direction="270" ShadowDepth="2" BlurRadius="5"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="📦 Sản phẩm" FontWeight="Bold" Foreground="#424242"/>
+                        <TextBlock Text="15 SKU" FontSize="24" Foreground="#1976D2" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Width="200" Height="120" Background="White" CornerRadius="8" Margin="10" Padding="15">
+                     <Border.Effect>
+                        <DropShadowEffect Color="#DDDDDD" Direction="270" ShadowDepth="2" BlurRadius="5"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="✅ Đã lắp ráp" FontWeight="Bold" Foreground="#424242"/>
+                        <TextBlock Text="1,240" FontSize="24" Foreground="#388E3C" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

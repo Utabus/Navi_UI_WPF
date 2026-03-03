@@ -1,0 +1,124 @@
+<UserControl x:Class="Navi_UI_WPF.Views.NaviProductItemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
+             xmlns:conv="clr-namespace:Navi_UI_WPF.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="750" d:DesignWidth="1100"
+             Background="{StaticResource BackgroundBrush}">
+    <UserControl.DataContext>
+        <vm:NaviProductItemViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ── Toolbar ─────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Style="{StaticResource Toolbar}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="🔗 SP ↔ Bước" Style="{StaticResource PageTitle}" Margin="0,0,14,0"/>
+
+                <ComboBox Grid.Column="1" Style="{StaticResource ComboCompact}"
+                          ItemsSource="{Binding AllProducts}" SelectedItem="{Binding FilterByProduct}"
+                          DisplayMemberPath="ProductName" Margin="0,0,6,0"/>
+                <ComboBox Grid.Column="2" Style="{StaticResource ComboCompact}"
+                          ItemsSource="{Binding AllItems}" SelectedItem="{Binding FilterByItem}"
+                          DisplayMemberPath="Description" Margin="0,0,6,0"/>
+
+                <!-- Exists check -->
+                <TextBlock Grid.Column="3" Text="Check:" VerticalAlignment="Center"
+                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,4,0"/>
+                <TextBox Grid.Column="4" Style="{StaticResource InputCompact}" Margin="0,0,4,0"
+                         Text="{Binding CheckProductId}" Padding="4,5"/>
+                <TextBlock Grid.Column="5" Text="↔" VerticalAlignment="Center" FontSize="13"
+                           Foreground="{StaticResource TextMutedBrush}" Margin="0,0,4,0"/>
+                <TextBox Grid.Column="6" Style="{StaticResource InputCompact}" Margin="0,0,4,0"
+                         Text="{Binding CheckItemId}" Padding="4,5"/>
+                <Button Grid.Column="7" Content="OK" Style="{StaticResource BtnGhost}"
+                        Padding="8,5" Command="{Binding CheckExistsCommand}" Margin="0,0,6,0"/>
+
+                <TextBlock Grid.Column="8" Text="{Binding ExistsCheckMessage}"
+                           FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                           VerticalAlignment="Center" Margin="2,0"/>
+
+                <Button Grid.Column="9" Content="🔍" Style="{StaticResource BtnGhost}" Padding="10,5"
+                        Command="{Binding FilterByProductCommand}" Margin="0,0,6,0"/>
+                <Button Grid.Column="10" Content="+ Thêm" Style="{StaticResource BtnPrimary}"
+                        Command="{Binding AddLinkCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- ── Table ──────────────────────────────────────────────────── -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="12">
+            <DataGrid Style="{StaticResource CompactGrid}"
+                      ItemsSource="{Binding ProductItems}"
+                      ColumnHeaderStyle="{StaticResource GridHeader}"
+                      RowStyle="{StaticResource GridRow}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="55" IsReadOnly="True"
+                                        ElementStyle="{StaticResource CellTextMuted}"/>
+                    <DataGridTextColumn Header="SẢN PHẨM" Binding="{Binding ProductName}" Width="*" IsReadOnly="True"
+                                        ElementStyle="{StaticResource CellTextBold}"/>
+                    <DataGridTemplateColumn Header="↔" Width="30">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="↔" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="13" Foreground="{StaticResource TextMutedBrush}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="BƯỚC LẮP RÁP" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                    <Border Background="#EFF6FF" CornerRadius="8" Padding="5,2" Margin="0,0,6,0">
+                                        <TextBlock FontSize="10" FontWeight="Bold" Foreground="#1D4ED8">
+                                            <TextBlock.Text>
+                                                <Binding Path="ItemStep" StringFormat="S{0}"/>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Border>
+                                    <TextBlock Text="{Binding ItemDescription}" VerticalAlignment="Center"
+                                               FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="" Width="65">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource BtnIcon}" Content="🗑️" Foreground="#E53935"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Command="{Binding DataContext.DeleteLinkCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>
