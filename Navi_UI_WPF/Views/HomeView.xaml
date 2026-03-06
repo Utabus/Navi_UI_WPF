@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Navi_UI_WPF.Views"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200"
@@ -25,25 +26,19 @@
             
             <!-- Quick Actions Demo -->
             <WrapPanel Margin="0,40,0,0" HorizontalAlignment="Center">
-                <Border Width="200" Height="120" Background="White" CornerRadius="8" Margin="10" Padding="15">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#DDDDDD" Direction="270" ShadowDepth="2" BlurRadius="5"/>
-                    </Border.Effect>
-                    <StackPanel>
+                <hc:Card Width="200" Height="120" Margin="10">
+                    <StackPanel Margin="15">
                         <TextBlock Text="📦 Sản phẩm" FontWeight="Bold" Foreground="#424242"/>
                         <TextBlock Text="15 SKU" FontSize="24" Foreground="#1976D2" Margin="0,10,0,0"/>
                     </StackPanel>
-                </Border>
+                </hc:Card>
                 
-                <Border Width="200" Height="120" Background="White" CornerRadius="8" Margin="10" Padding="15">
-                     <Border.Effect>
-                        <DropShadowEffect Color="#DDDDDD" Direction="270" ShadowDepth="2" BlurRadius="5"/>
-                    </Border.Effect>
-                    <StackPanel>
+                <hc:Card Width="200" Height="120" Margin="10">
+                    <StackPanel Margin="15">
                         <TextBlock Text="✅ Đã lắp ráp" FontWeight="Bold" Foreground="#424242"/>
                         <TextBlock Text="1,240" FontSize="24" Foreground="#388E3C" Margin="0,10,0,0"/>
                     </StackPanel>
-                </Border>
+                </hc:Card>
             </WrapPanel>
         </StackPanel>
     </Grid>

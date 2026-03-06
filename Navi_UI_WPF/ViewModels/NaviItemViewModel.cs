@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Navi_UI_WPF.Commands;
 using Navi.Application.DTOs;
+using Serilog;
+using Navi_UI_WPF.Helpers;
 
 namespace Navi_UI_WPF.ViewModels
 {
@@ -152,6 +154,7 @@ namespace Navi_UI_WPF.ViewModels
 
         private void ExecuteSearch()
         {
+            Log.Information("Người dùng thực hiện tìm kiếm với từ khóa: {SearchTerm}", SearchTerm);
             StatusMessage = $"Đang tìm kiếm: \"{SearchTerm}\"...";
             // TODO: gọi INaviItemService.SearchAsync(SearchTerm)
         }
@@ -187,11 +190,26 @@ namespace Navi_UI_WPF.ViewModels
         private void ExecuteDelete(NaviItemDto item)
         {
             if (item == null) return;
-            Items.Remove(item);
-            SelectedItem = null;
-            IsDetailVisible = false;
-            StatusMessage = $"Đã xóa bước: {item.Description}";
-            // TODO: gọi INaviItemService.DeleteAsync(item.Id)
+
+            using (LoggerHelper.WithSerialNumber(item.Id.ToString()))
+            {
+                try
+                {
+                    Log.Information("Bắt đầu xóa bước lắp ráp: {Description}", item.Description);
+                    Items.Remove(item);
+                    SelectedItem = null;
+                    IsDetailVisible = false;
+                    StatusMessage = $"Đã xóa bước: {item.Description}";
+                    
+                    Log.Information("Đã xóa thành công bước lắp ráp ID: {Id}", item.Id);
+                    // TODO: gọi INaviItemService.DeleteAsync(item.Id)
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Lỗi xảy ra khi xóa bước lắp ráp ID: {Id}", item.Id);
+                    StatusMessage = "Có lỗi xảy ra khi xóa.";
+                }
+            }
         }
 
         private void SelectItem(NaviItemDto item)

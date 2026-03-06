@@ -83,6 +83,12 @@ namespace Navi_UI_WPF.ViewModels
         }
 
         public System.ComponentModel.ICollectionView StepsView { get; private set; }
+        private string _poNumber;
+        public string PoNumber
+        {
+            get => _poNumber;
+            set => SetProperty(ref _poNumber, value);
+        }
 
         public int ProductId
         {

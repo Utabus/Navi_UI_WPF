@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
              xmlns:conv="clr-namespace:Navi_UI_WPF.Converters"
              mc:Ignorable="d"
@@ -35,14 +36,15 @@
 
                 <TextBlock Grid.Column="0" Text="🔧 Bước lắp ráp" Style="{StaticResource PageTitle}" Margin="0,0,16,0"/>
 
-                <TextBox Grid.Column="1" Style="{StaticResource InputCompact}"
-                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0">
-                    <TextBox.InputBindings>
+                <hc:TextBox Grid.Column="1" Style="{StaticResource InputCompact}"
+                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"
+                         hc:InfoElement.Placeholder="Tìm bước lắp ráp...">
+                    <hc:TextBox.InputBindings>
                         <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
+                    </hc:TextBox.InputBindings>
+                </hc:TextBox>
 
-                <ComboBox Grid.Column="2" Style="{StaticResource ComboCompact}"
+                <hc:ComboBox Grid.Column="2" Style="{StaticResource ComboCompact}"
                           ItemsSource="{Binding AvailableTypes}"
                           SelectedItem="{Binding SelectedType}"
                           Margin="0,0,6,0"/>
@@ -162,18 +164,20 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                     <TextBlock Text="Step" Style="{StaticResource FormLabel}"/>
-                                    <TextBox Text="{Binding EditStep}" Style="{StaticResource InputCompact}"/>
+                            <hc:TextBox Text="{Binding EditStep}" Style="{StaticResource InputCompact}"
+                                        hc:InfoElement.Placeholder="Step số..."/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                     <TextBlock Text="Loại" Style="{StaticResource FormLabel}"/>
-                                    <ComboBox ItemsSource="{Binding AvailableTypes}"
+                                    <hc:ComboBox ItemsSource="{Binding AvailableTypes}"
                                               SelectedItem="{Binding EditType}"
                                               Style="{StaticResource ComboCompact}"/>
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Text="Mô tả" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding EditDescription}" Style="{StaticResource InputCompact}" Margin="0,0,0,8"/>
+                            <hc:TextBox Text="{Binding EditDescription}" Style="{StaticResource InputCompact}"
+                                        hc:InfoElement.Placeholder="Mô tả bước lắp ráp..." Margin="0,0,0,8"/>
 
                             <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
@@ -182,18 +186,21 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                     <TextBlock Text="Bu lông" Style="{StaticResource FormLabel}"/>
-                                    <TextBox Text="{Binding EditBolts}" Style="{StaticResource InputCompact}"/>
+                                    <hc:TextBox Text="{Binding EditBolts}" Style="{StaticResource InputCompact}"
+                                                hc:InfoElement.Placeholder="Ví dụ: M10"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                     <TextBlock Text="Lực (Nm)" Style="{StaticResource FormLabel}"/>
-                                    <TextBox Text="{Binding EditForce}" Style="{StaticResource InputCompact}"/>
+                                    <hc:TextBox Text="{Binding EditForce}" Style="{StaticResource InputCompact}"
+                                                hc:InfoElement.Placeholder="Ví dụ: 50Nm"/>
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Text="Ghi chú" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding EditNote}" Style="{StaticResource InputCompact}"
-                                     Height="50" TextWrapping="Wrap" AcceptsReturn="True"
-                                     VerticalScrollBarVisibility="Auto"/>
+                            <hc:TextBox Text="{Binding EditNote}" Style="{StaticResource InputCompact}"
+                                        hc:InfoElement.Placeholder="Ghi chú thêm..."
+                                        Height="50" TextWrapping="Wrap" AcceptsReturn="True"
+                                        VerticalScrollBarVisibility="Auto"/>
                         </StackPanel>
                     </ScrollViewer>
 

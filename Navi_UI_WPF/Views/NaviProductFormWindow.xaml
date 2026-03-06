@@ -1,0 +1,78 @@
+<hc:Window
+    x:Class="Navi_UI_WPF.Views.NaviProductFormWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
+    Title="{Binding StatusMessage}"
+    Width="450"
+    Height="350"
+    Background="{StaticResource BackgroundBrush}"
+    NonClientAreaBackground="{StaticResource BrandBrush}"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            Style="{StaticResource SectionTitle}"
+            Text="{Binding StatusMessage}" />
+
+        <TextBlock
+            Grid.Row="1"
+            Style="{StaticResource FormLabel}"
+            Text="Tên sản phẩm *" />
+        <hc:TextBox
+            Grid.Row="2"
+            Margin="0,0,0,15"
+            hc:InfoElement.Placeholder="Nhập tên sản phẩm..."
+            Style="{StaticResource InputCompact}"
+            Text="{Binding EditProductName, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBlock
+            Grid.Row="3"
+            Style="{StaticResource FormLabel}"
+            Text="Mô tả" />
+        <hc:TextBox
+            Grid.Row="4"
+            Height="80"
+            Margin="0,0,0,20"
+            hc:InfoElement.Placeholder="Nhập mô tả..."
+            AcceptsReturn="True"
+            Style="{StaticResource InputCompact}"
+            Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
+            TextWrapping="Wrap"
+            VerticalScrollBarVisibility="Auto" />
+
+        <StackPanel
+            Grid.Row="5"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="80"
+                Margin="0,0,10,0"
+                Click="BtnCancel_Click"
+                Content="Hủy"
+                Style="{StaticResource BtnGhost}" />
+            <Button
+                Width="80"
+                Click="BtnSave_Click"
+                Command="{Binding SaveCommand}"
+                Content="Lưu"
+                Style="{StaticResource BtnPrimary}" />
+        </StackPanel>
+    </Grid>
+</hc:Window>

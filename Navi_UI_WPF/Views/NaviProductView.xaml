@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
              xmlns:conv="clr-namespace:Navi_UI_WPF.Converters"
              mc:Ignorable="d"
@@ -37,13 +38,14 @@
 
                 <TextBlock Grid.Column="0" Text="📦 Sản phẩm" Style="{StaticResource PageTitle}" Margin="0,0,16,0"/>
 
-                <TextBox Grid.Column="1" Style="{StaticResource InputCompact}"
+                <hc:TextBox Grid.Column="1" Style="{StaticResource InputCompact}"
                          Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                         hc:InfoElement.Placeholder="Tìm sản phẩm..."
                          Margin="0,0,6,0">
-                    <TextBox.InputBindings>
+                    <hc:TextBox.InputBindings>
                         <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
+                    </hc:TextBox.InputBindings>
+                </hc:TextBox>
 
                 <TextBlock Grid.Column="2" Text="{Binding StatusMessage}"
                            FontSize="11" Foreground="{StaticResource TextMutedBrush}"
@@ -72,11 +74,6 @@
                           SelectedItem="{Binding SelectedProduct}"
                           ColumnHeaderStyle="{StaticResource GridHeader}"
                           RowStyle="{StaticResource GridRow}">
-                    <DataGrid.InputBindings>
-                        <MouseBinding MouseAction="LeftClick"
-                                      Command="{Binding SelectProductCommand}"
-                                      CommandParameter="{Binding SelectedProduct, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                    </DataGrid.InputBindings>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="55" IsReadOnly="True"
                                             ElementStyle="{StaticResource CellTextMuted}"/>
@@ -119,12 +116,7 @@
                         <TextBlock>
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource SectionTitle}">
-                                    <Setter Property="Text" Value="Chi tiết sản phẩm"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
-                                            <Setter Property="Text" Value="Chỉnh sửa sản phẩm"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
+                                    <Setter Property="Text" Value="Các bước lắp ráp thuộc sản phẩm"/>
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
@@ -133,27 +125,33 @@
                                 Command="{Binding ClearSelectionCommand}"/>
                     </Grid>
 
-                    <!-- Form -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Tên sản phẩm" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding EditProductName, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource InputCompact}" Margin="0,0,0,10"/>
-
-                            <TextBlock Text="Mô tả" Style="{StaticResource FormLabel}"/>
-                            <TextBox Text="{Binding EditDescription, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource InputCompact}" Height="60"
-                                     TextWrapping="Wrap" AcceptsReturn="True"
-                                     VerticalScrollBarVisibility="Auto"/>
-                        </StackPanel>
-                    </ScrollViewer>
+                    <!-- Product Items Grid -->
+                    <Grid Grid.Row="1" Margin="0,5,0,0">
+                        <DataGrid Style="{StaticResource CompactGrid}"
+                                  ItemsSource="{Binding SelectedProductWithItems.Items}"
+                                  ColumnHeaderStyle="{StaticResource GridHeader}"
+                                  RowStyle="{StaticResource GridRow}"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  IsReadOnly="True"
+                                  MinHeight="150"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  BorderThickness="1"
+                                  BorderBrush="{StaticResource BorderBrush}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="STEP" Binding="{Binding Step}" Width="50" ElementStyle="{StaticResource CellTextMuted}"/>
+                                <DataGridTextColumn Header="MÔ TẢ" Binding="{Binding Description}" Width="*" ElementStyle="{StaticResource CellTextBold}"/>
+                                <DataGridTextColumn Header="BU LÔNG" Binding="{Binding Bolts}" Width="80" ElementStyle="{StaticResource CellTextMuted}"/>
+                                <DataGridTextColumn Header="LỰC SIẾT" Binding="{Binding Force}" Width="70" ElementStyle="{StaticResource CellTextMuted}"/>
+                                <DataGridTextColumn Header="TYPE" Binding="{Binding Type}" Width="80" ElementStyle="{StaticResource CellTextMuted}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
 
                     <!-- Actions -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <Button Content="Hủy" Style="{StaticResource BtnGhost}" Margin="0,0,6,0"
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                        <Button Content="Đóng" Style="{StaticResource BtnGhost}"
                                 Command="{Binding ClearSelectionCommand}"/>
-                        <Button Content="Lưu" Style="{StaticResource BtnPrimary}"
-                                Command="{Binding SaveCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>

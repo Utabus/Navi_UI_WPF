@@ -38,6 +38,12 @@
     <Reference Include="HandyControl, Version=3.5.2.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
       <HintPath>..\packages\HandyControls.3.5.3\lib\net472\HandyControl.dll</HintPath>
     </Reference>
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.2.10.0\lib\net46\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.File, Version=5.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.File.5.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -58,6 +64,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Views\TestUC.xaml.cs">
+      <DependentUpon>TestUC.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,6 +84,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\NaviProductItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\NaviProductFormWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -100,6 +113,7 @@
     </Compile>
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Converters\ValueConverters.cs" />
+    <Compile Include="Helpers\LoggerHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -122,6 +136,9 @@
     <Compile Include="Views\NaviItemView.xaml.cs">
       <DependentUpon>NaviItemView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\NaviProductFormWindow.xaml.cs">
+      <DependentUpon>NaviProductFormWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\NaviProductItemView.xaml.cs">
       <DependentUpon>NaviProductItemView.xaml</DependentUpon>
     </Compile>
@@ -131,6 +148,10 @@
     <Compile Include="Views\ProductAssemblyView.xaml.cs">
       <DependentUpon>ProductAssemblyView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\TestUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

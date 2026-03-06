@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using Navi_UI_WPF.Commands;
 using System.Windows;
+using Navi_UI_WPF.Views;
 
 namespace Navi_UI_WPF.ViewModels
 {
@@ -18,7 +19,7 @@ namespace Navi_UI_WPF.ViewModels
             NavigateToProductCommand = new RelayCommand(o => CurrentView = new NaviProductViewModel());
             NavigateToItemCommand = new RelayCommand(o => CurrentView = new NaviItemViewModel());
             NavigateToProductItemCommand = new RelayCommand(o => CurrentView = new NaviProductItemViewModel());
-            NavigateToHistoryCommand = new RelayCommand(o => CurrentView = new NaviHistoryViewModel());
+            NavigateToHistoryCommand = new RelayCommand(o => CurrentView = new TestUC());
             ExitCommand = new RelayCommand(o => Application.Current.Shutdown());
             ToggleMenuCommand = new RelayCommand(o => IsMenuOpen = !IsMenuOpen);
         }

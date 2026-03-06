@@ -37,7 +37,16 @@ namespace Navi_UI_WPF.ViewModels
         public NaviProductDto SelectedProduct
         {
             get => _selectedProduct;
-            set => SetProperty(ref _selectedProduct, value);
+            set
+            {
+                if (SetProperty(ref _selectedProduct, value))
+                {
+                    if (value != null)
+                    {
+                        SelectProduct(value);
+                    }
+                }
+            }
         }
 
         private NaviProductWithItemsDto _selectedProductWithItems;
@@ -122,9 +131,11 @@ namespace Navi_UI_WPF.ViewModels
             IsEditMode = false;
             EditProductName = "";
             EditDescription = "";
-            IsDetailVisible = true;
             SelectedProductWithItems = new NaviProductWithItemsDto();
             StatusMessage = "Thêm sản phẩm mới";
+
+            var dialog = new Views.NaviProductFormWindow(this);
+            dialog.ShowDialog();
         }
 
         private void OpenEditDialog(NaviProductDto product)
@@ -133,8 +144,10 @@ namespace Navi_UI_WPF.ViewModels
             IsEditMode = true;
             EditProductName = product.ProductName;
             EditDescription = product.Description;
-            IsDetailVisible = true;
             StatusMessage = $"Chỉnh sửa: {product.ProductName}";
+
+            var dialog = new Views.NaviProductFormWindow(this);
+            dialog.ShowDialog();
         }
 
         private void ExecuteDelete(NaviProductDto product)
@@ -152,18 +165,27 @@ namespace Navi_UI_WPF.ViewModels
             if (product == null) return;
             SelectedProduct = product;
             IsDetailVisible = true;
-            // Tạo WithItems từ selected product (demo)
-            SelectedProductWithItems = new NaviProductWithItemsDto
+            
+            // Tạo WithItems từ selected product (demo) và load item ảo
+            var withItems = new NaviProductWithItemsDto
             {
                 Id = product.Id,
                 ProductName = product.ProductName,
                 Description = product.Description,
                 Cdt = product.Cdt,
-                Udt = product.Udt
+                Udt = product.Udt,
+                Items = new System.Collections.Generic.List<NaviItemDto>() // Assure it's a new list
             };
-            EditProductName = product.ProductName;
-            EditDescription = product.Description;
-            StatusMessage = $"Đang xem: {product.ProductName}";
+
+            // Tạo data ảo cho drawer list
+            withItems.Items.Add(new NaviItemDto { Id = 1, Step = 1, Description = "Siết bu lông M10", Bolts = "M10", Force = "50Nm", Type = "Assembly" });
+            withItems.Items.Add(new NaviItemDto { Id = 2, Step = 2, Description = "Kiểm tra lực siết", Type = "Check" });
+            
+            // Assign to trigger PropertyChanged
+            SelectedProductWithItems = withItems;
+            OnPropertyChanged(nameof(SelectedProductWithItems)); // Đảm bảo UI nhận được tín hiệu cập nhật
+
+            StatusMessage = $"Đang xem chi tiết {product.ProductName} ({withItems.Items.Count} items)";
         }
 
         // ── Sample Data ──────────────────────────────────────────────────
