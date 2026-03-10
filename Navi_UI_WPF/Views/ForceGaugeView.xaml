@@ -1,0 +1,415 @@
+<UserControl
+    x:Class="Navi_UI_WPF.Views.ForceGaugeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
+    d:DesignHeight="650"
+    d:DesignWidth="1100"
+    Background="White"
+    mc:Ignorable="d"
+    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+    
+    >
+
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="280" />
+            <!--  Chart  -->
+            <RowDefinition Height="8" />
+            <!--  Spacer  -->
+            <RowDefinition Height="Auto" MinHeight="180" />
+            <!--  Bottom panels  -->
+        </Grid.RowDefinitions>
+
+        <!--  ══ CHART SECTION ══════════════════════════════════════════════  -->
+        <Border
+            Grid.Row="0"
+            Padding="5,5,5,0"
+            BorderBrush="#CCCCCC"
+            BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--  Title  -->
+                <TextBlock
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Foreground="#0000CC"
+                    Text="BIỂU ĐỒ FORCE GAUGE" Margin="10" />
+
+                <!--  LiveCharts CartesianChart  -->
+                <lvc:CartesianChart
+                    Grid.Row="1"
+                    MinHeight="200"
+                    Margin="0 20 0 0"
+                    Series="{Binding SeriesCollection}"
+                    DisableAnimations="True">
+
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis
+                            Title="Thời gian"
+                            FontSize="14"
+                            LabelFormatter="{Binding XFormatter}"
+                            LabelsRotation="0" />
+                    </lvc:CartesianChart.AxisX>
+
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis
+                            Title="Lực (g)"
+                            FontSize="14"
+                            MinValue="-100"
+                            MaxValue="100" />
+                    </lvc:CartesianChart.AxisY>
+
+                </lvc:CartesianChart>
+
+            </Grid> 
+        </Border>
+
+        <!--  ══ BOTTOM 3-PANEL SECTION ════════════════════════════════════  -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <!--  Thông tin hàng  -->
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+                <!--  Block 1 + 2  -->
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="240" />
+                <!--  Kết nối  -->
+            </Grid.ColumnDefinitions>
+
+            <!--  ── Panel 1: Thông tin hàng ────────────────────────────────  -->
+            <Border
+                Grid.Column="0"
+                Padding="12,8"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#0000CC"
+                        Text="Thông tin hàng" />
+
+                    <!--  Số PO  -->
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Text="Số PO" />
+                        <TextBox
+                            Grid.Column="1"
+                            FontSize="12"
+                            Text="{Binding PoNumber, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <!--  Tên hàng  -->
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Text="Tên hàng" />
+                        <TextBox
+                            Grid.Column="1"
+                            FontSize="12"
+                            Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <!--  Số lot  -->
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Text="Số lot" />
+                        <TextBox
+                            Grid.Column="1"
+                            FontSize="12"
+                            Text="{Binding LotNumber, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <!--  Số lượng  -->
+                    <Grid Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Text="Số lượng" />
+                        <TextBox
+                            Grid.Column="1"
+                            FontSize="12"
+                            Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!--  ── Panel 2: Block 1 + Block 2 ──────────────────────────────  -->
+            <Border
+                Grid.Column="2"
+                Padding="12,8"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="70" />
+                        <!--  Labels  -->
+                        <ColumnDefinition Width="*" />
+                        <!--  Block 1 inputs  -->
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                        <!--  Block 2 inputs  -->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <!--  Headers  -->
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <!--  Size Ball  -->
+                        <RowDefinition Height="6" />
+                        <RowDefinition Height="Auto" />
+                        <!--  Lực Min  -->
+                        <RowDefinition Height="6" />
+                        <RowDefinition Height="Auto" />
+                        <!--  Lực Max  -->
+                    </Grid.RowDefinitions>
+
+                    <!--  Headers  -->
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        HorizontalAlignment="Center"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#008800"
+                        Text="Block 1" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        HorizontalAlignment="Center"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#008800"
+                        Text="Block 2" />
+
+                    <!--  Size Ball row  -->
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Text="Size Ball" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding Block1SizeBall, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="3"
+                        FontSize="12"
+                        Text="{Binding Block2SizeBall, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <!--  Lực Min row  -->
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Text="Lực Min" />
+                    <TextBox
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding Block1LucMin, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox
+                        Grid.Row="4"
+                        Grid.Column="3"
+                        FontSize="12"
+                        Text="{Binding Block2LucMin, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <!--  Lực Max row  -->
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Text="Lực Max" />
+                    <TextBox
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding Block1LucMax, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox
+                        Grid.Row="6"
+                        Grid.Column="3"
+                        FontSize="12"
+                        Text="{Binding Block2LucMax, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </Border>
+
+            <!--  ── Panel 3: Kết nối ─────────────────────────────────────────  -->
+            <Border
+                Grid.Column="4"
+                Padding="12,8"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <!--  Title  -->
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                        <!--  Buttons  -->
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="#008800"
+                        Text="KẾT NỐI" />
+
+                    <!--  2×2 button grid  -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!--  CONNECT / DISCONNECT  -->
+                        <Button
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Command="{Binding ConnectCommand}"
+                            Cursor="Hand"
+                            FontSize="11"
+                            FontWeight="Bold"
+                            Foreground="White">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="{Binding ConnectionButtonColor}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border
+                                                    Background="{TemplateBinding Background}"
+                                                    CornerRadius="3">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="11"
+                                FontWeight="Bold"
+                                Foreground="White"
+                                Text="{Binding ConnectionStatus}"
+                                TextWrapping="Wrap" />
+                        </Button>
+
+                        <!--  Result Block 1  -->
+                        <Border
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Background="#22CC22"
+                            CornerRadius="3">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Foreground="White"
+                                Text="Result Block 1" />
+                        </Border>
+
+                        <!--  SAVE  -->
+                        <Button
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Command="{Binding SaveCommand}"
+                            Cursor="Hand"
+                            FontSize="12"
+                            FontWeight="Bold">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#FFD966" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border
+                                                    Background="{TemplateBinding Background}"
+                                                    CornerRadius="3">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Foreground="#333333"
+                                Text="SAVE" />
+                        </Button>
+
+                        <!--  Result Block 2  -->
+                        <Border
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            Background="#22CC22"
+                            CornerRadius="3">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Foreground="White"
+                                Text="Result Block 2" />
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

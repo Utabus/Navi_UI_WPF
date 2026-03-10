@@ -1,7 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Navi.Application.DTOs;
 using Serilog;
 using Navi_UI_WPF.Helpers;
@@ -11,7 +12,7 @@ namespace Navi_UI_WPF.ViewModels
     /// <summary>
     /// ViewModel quản lý Bước lắp ráp (NaviItem)
     /// </summary>
-    public class NaviItemViewModel : ViewModelBase
+    public class NaviItemViewModel : ObservableObject
     {
         public NaviItemViewModel()
         {
@@ -20,13 +21,13 @@ namespace Navi_UI_WPF.ViewModels
             SelectedType = "Tất cả";
             LoadSampleData();
 
-            SearchCommand = new RelayCommand(o => ExecuteSearch());
-            FilterByTypeCommand = new RelayCommand(o => ExecuteFilterByType());
-            AddCommand = new RelayCommand(o => OpenAddDialog());
-            EditCommand = new RelayCommand(o => OpenEditDialog(o as NaviItemDto), o => SelectedItem != null);
-            DeleteCommand = new RelayCommand(o => ExecuteDelete(o as NaviItemDto), o => SelectedItem != null);
-            SelectItemCommand = new RelayCommand(o => SelectItem(o as NaviItemDto));
-            ClearSelectionCommand = new RelayCommand(o => { SelectedItem = null; IsDetailVisible = false; });
+            SearchCommand        = new RelayCommand(() => ExecuteSearch());
+            FilterByTypeCommand  = new RelayCommand(() => ExecuteFilterByType());
+            AddCommand           = new RelayCommand(() => OpenAddDialog());
+            EditCommand          = new RelayCommand<NaviItemDto>(item => OpenEditDialog(item), _ => SelectedItem != null);
+            DeleteCommand        = new RelayCommand<NaviItemDto>(item => ExecuteDelete(item),   _ => SelectedItem != null);
+            SelectItemCommand    = new RelayCommand<NaviItemDto>(item => SelectItem(item));
+            ClearSelectionCommand = new RelayCommand(() => { SelectedItem = null; IsDetailVisible = false; });
         }
 
         // ── Collections & Selection ──────────────────────────────────────

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Navi.Application.DTOs;
 
 namespace Navi_UI_WPF.ViewModels
@@ -9,7 +10,7 @@ namespace Navi_UI_WPF.ViewModels
     /// <summary>
     /// ViewModel quản lý lịch sử thao tác nhân viên (NaviHistory)
     /// </summary>
-    public class NaviHistoryViewModel : ViewModelBase
+    public class NaviHistoryViewModel : ObservableObject
     {
         public NaviHistoryViewModel()
         {
@@ -17,17 +18,17 @@ namespace Navi_UI_WPF.ViewModels
             AvailableTypes = new ObservableCollection<string> { "SCAN", "CHECK", "CONFIRM", "REWORK", "REJECT" };
             LoadSampleData();
 
-            LoadAllCommand = new RelayCommand(o => LoadAll());
-            FilterByCodeNVCommand = new RelayCommand(o => ExecuteFilterByCodeNV());
-            FilterByPOCommand = new RelayCommand(o => ExecuteFilterByPO());
-            FilterByProductItemCommand = new RelayCommand(o => ExecuteFilterByProductItem());
-            ClearFilterCommand = new RelayCommand(o => ClearFilters());
-            AddCommand = new RelayCommand(o => OpenAddDialog());
-            EditCommand = new RelayCommand(o => OpenEditDialog(o as NaviHistoryDto), o => SelectedRecord != null);
-            DeleteCommand = new RelayCommand(o => ExecuteDelete(o as NaviHistoryDto), o => SelectedRecord != null);
-            SelectRecordCommand = new RelayCommand(o => SelectRecord(o as NaviHistoryDto));
-            SaveCommand = new RelayCommand(o => ExecuteSave());
-            CancelEditCommand = new RelayCommand(o => { IsDetailVisible = false; SelectedRecord = null; });
+            LoadAllCommand         = new RelayCommand(() => LoadAll());
+            FilterByCodeNVCommand  = new RelayCommand(() => ExecuteFilterByCodeNV());
+            FilterByPOCommand      = new RelayCommand(() => ExecuteFilterByPO());
+            FilterByProductItemCommand = new RelayCommand(() => ExecuteFilterByProductItem());
+            ClearFilterCommand     = new RelayCommand(() => ClearFilters());
+            AddCommand             = new RelayCommand(() => OpenAddDialog());
+            EditCommand            = new RelayCommand<NaviHistoryDto>(item => OpenEditDialog(item), _ => SelectedRecord != null);
+            DeleteCommand          = new RelayCommand<NaviHistoryDto>(item => ExecuteDelete(item), _ => SelectedRecord != null);
+            SelectRecordCommand    = new RelayCommand<NaviHistoryDto>(item => SelectRecord(item));
+            SaveCommand            = new RelayCommand(() => ExecuteSave());
+            CancelEditCommand      = new RelayCommand(() => { IsDetailVisible = false; SelectedRecord = null; });
         }
 
         // ── Collections & Selection ──────────────────────────────────────

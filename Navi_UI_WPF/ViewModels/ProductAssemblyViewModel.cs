@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Navi.Application.Services;
 using Navi.Infrastructure.Repositories;
 
@@ -14,7 +15,7 @@ namespace Navi_UI_WPF.ViewModels
     /// ViewModel chính cho Product Assembly View
     /// Main ViewModel for Product Assembly View
     /// </summary>
-    public class ProductAssemblyViewModel : ViewModelBase
+    public class ProductAssemblyViewModel : ObservableObject
     {
         private readonly ProductAssemblyService _service;
         
@@ -43,11 +44,11 @@ namespace Navi_UI_WPF.ViewModels
             StepsView.Filter = FilterSteps;
             
             // Initialize commands
-            NextStepCommand = new RelayCommand(_ => NextStep(), _ => CanGoNext());
-            PreviousStepCommand = new RelayCommand(_ => PreviousStep(), _ => CanGoPrevious());
-            JumpToStepCommand = new RelayCommand<AssemblyStepViewModel>(step => JumpToStep(step));
-            LoadDataCommand = new RelayCommand<int>(async id => await LoadProductAssemblyAsync(id));
-            ToggleStepCompletionCommand = new RelayCommand(_ => ToggleCurrentStepCompletion());
+            NextStepCommand             = new RelayCommand(NextStep, CanGoNext);
+            PreviousStepCommand         = new RelayCommand(PreviousStep, CanGoPrevious);
+            JumpToStepCommand           = new RelayCommand<AssemblyStepViewModel>(JumpToStep);
+            LoadDataCommand             = new RelayCommand<int>(async id => await LoadProductAssemblyAsync(id));
+            ToggleStepCompletionCommand = new RelayCommand(ToggleCurrentStepCompletion);
         }
 
         #region Properties

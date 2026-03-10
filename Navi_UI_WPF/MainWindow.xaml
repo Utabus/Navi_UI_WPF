@@ -34,6 +34,9 @@
         <DataTemplate DataType="{x:Type vm:NaviHistoryViewModel}">
             <views:NaviHistoryView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ForceGaugeViewModel}">
+            <views:ForceGaugeView />
+        </DataTemplate>
     </Window.Resources>
 
     <Window.DataContext>
@@ -203,6 +206,11 @@
                         Command="{Binding NavigateToHistoryCommand}"
                         Content="Lịch sử thao tác"
                         Tag="📋" />
+
+                    <RadioButton
+                        Command="{Binding NavigateToForceGaugeCommand}"
+                        Content="Force Gauge"
+                        Tag="📈" />
 
                     <RadioButton Content="RS232" Tag="⚙️" />
                     <RadioButton Content="Cài Đặt" Tag="⚙️" />

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Navi.Application.DTOs;
 
 namespace Navi_UI_WPF.ViewModels
@@ -9,19 +10,19 @@ namespace Navi_UI_WPF.ViewModels
     /// <summary>
     /// ViewModel quản lý Sản phẩm (NaviProduct)
     /// </summary>
-    public class NaviProductViewModel : ViewModelBase
+    public class NaviProductViewModel : ObservableObject
     {
         public NaviProductViewModel()
         {
             Products = new ObservableCollection<NaviProductDto>();
             LoadSampleData();
 
-            SearchCommand = new RelayCommand(o => ExecuteSearch());
-            AddCommand = new RelayCommand(o => OpenAddDialog());
-            EditCommand = new RelayCommand(o => OpenEditDialog(o as NaviProductDto), o => SelectedProduct != null);
-            DeleteCommand = new RelayCommand(o => ExecuteDelete(o as NaviProductDto), o => SelectedProduct != null);
-            SelectProductCommand = new RelayCommand(o => SelectProduct(o as NaviProductDto));
-            ClearSelectionCommand = new RelayCommand(o => { SelectedProduct = null; IsDetailVisible = false; });
+            SearchCommand        = new RelayCommand(() => ExecuteSearch());
+            AddCommand           = new RelayCommand(() => OpenAddDialog());
+            EditCommand          = new RelayCommand<NaviProductDto>(item => OpenEditDialog(item), _ => SelectedProduct != null);
+            DeleteCommand        = new RelayCommand<NaviProductDto>(item => ExecuteDelete(item),  _ => SelectedProduct != null);
+            SelectProductCommand = new RelayCommand<NaviProductDto>(item => SelectProduct(item));
+            ClearSelectionCommand = new RelayCommand(() => { SelectedProduct = null; IsDetailVisible = false; });
         }
 
         // ── Collections & Selection ──────────────────────────────────────

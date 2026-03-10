@@ -1,4 +1,5 @@
 using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Navi_UI_WPF.ViewModels
 {
@@ -6,7 +7,7 @@ namespace Navi_UI_WPF.ViewModels
     /// ViewModel cho một bước lắp ráp
     /// ViewModel for an assembly instruction step
     /// </summary>
-    public class AssemblyStepViewModel : ViewModelBase
+    public class AssemblyStepViewModel : ObservableObject
     {
         private int _id;
         private string _description;

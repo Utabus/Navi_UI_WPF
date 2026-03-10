@@ -1,7 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Navi.Application.DTOs;
 
 namespace Navi_UI_WPF.ViewModels
@@ -9,7 +10,7 @@ namespace Navi_UI_WPF.ViewModels
     /// <summary>
     /// ViewModel quản lý liên kết Product ↔ Item (NaviProductItem)
     /// </summary>
-    public class NaviProductItemViewModel : ViewModelBase
+    public class NaviProductItemViewModel : ObservableObject
     {
         public NaviProductItemViewModel()
         {
@@ -18,13 +19,13 @@ namespace Navi_UI_WPF.ViewModels
             AllItems = new ObservableCollection<NaviItemDto>();
             LoadSampleData();
 
-            LoadAllCommand = new RelayCommand(o => LoadAll());
-            FilterByProductCommand = new RelayCommand(o => ExecuteFilterByProduct());
-            FilterByItemCommand = new RelayCommand(o => ExecuteFilterByItem());
-            CheckExistsCommand = new RelayCommand(o => CheckExists());
-            AddLinkCommand = new RelayCommand(o => OpenAddLinkDialog());
-            DeleteLinkCommand = new RelayCommand(o => ExecuteDeleteLink(o as NaviProductItemDto));
-            ClearFilterCommand = new RelayCommand(o => ClearFilters());
+            LoadAllCommand          = new RelayCommand(() => LoadAll());
+            FilterByProductCommand  = new RelayCommand(() => ExecuteFilterByProduct());
+            FilterByItemCommand     = new RelayCommand(() => ExecuteFilterByItem());
+            CheckExistsCommand      = new RelayCommand(() => CheckExists());
+            AddLinkCommand          = new RelayCommand(() => OpenAddLinkDialog());
+            DeleteLinkCommand       = new RelayCommand<NaviProductItemDto>(link => ExecuteDeleteLink(link));
+            ClearFilterCommand      = new RelayCommand(() => ClearFilters());
         }
 
         // ── Collections ──────────────────────────────────────────────────

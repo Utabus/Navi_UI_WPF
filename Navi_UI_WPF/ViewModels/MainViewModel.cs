@@ -1,11 +1,12 @@
 using System.Windows.Input;
-using Navi_UI_WPF.Commands;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using Navi_UI_WPF.Views;
 
 namespace Navi_UI_WPF.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ObservableObject
     {
         public MainViewModel()
         {
@@ -14,14 +15,15 @@ namespace Navi_UI_WPF.ViewModels
             IsMenuOpen = true; // Default open
             
             // Commands
-            NavigateToHomeCommand = new RelayCommand(o => CurrentView = new HomeViewModel());
-            NavigateToAssemblyCommand = new RelayCommand(o => CurrentView = new ProductAssemblyViewModel());
-            NavigateToProductCommand = new RelayCommand(o => CurrentView = new NaviProductViewModel());
-            NavigateToItemCommand = new RelayCommand(o => CurrentView = new NaviItemViewModel());
-            NavigateToProductItemCommand = new RelayCommand(o => CurrentView = new NaviProductItemViewModel());
-            NavigateToHistoryCommand = new RelayCommand(o => CurrentView = new TestUC());
-            ExitCommand = new RelayCommand(o => Application.Current.Shutdown());
-            ToggleMenuCommand = new RelayCommand(o => IsMenuOpen = !IsMenuOpen);
+            NavigateToHomeCommand        = new RelayCommand(() => CurrentView = new HomeViewModel());
+            NavigateToAssemblyCommand    = new RelayCommand(() => CurrentView = new ProductAssemblyViewModel());
+            NavigateToProductCommand     = new RelayCommand(() => CurrentView = new NaviProductViewModel());
+            NavigateToItemCommand        = new RelayCommand(() => CurrentView = new NaviItemViewModel());
+            NavigateToProductItemCommand = new RelayCommand(() => CurrentView = new NaviProductItemViewModel());
+            NavigateToHistoryCommand     = new RelayCommand(() => CurrentView = new NaviHistoryViewModel());
+            NavigateToForceGaugeCommand  = new RelayCommand(() => CurrentView = new ForceGaugeViewModel());
+            ExitCommand                  = new RelayCommand(() => Application.Current.Shutdown());
+            ToggleMenuCommand            = new RelayCommand(() => IsMenuOpen = !IsMenuOpen);
         }
 
         private bool _isMenuOpen;
@@ -46,6 +48,7 @@ namespace Navi_UI_WPF.ViewModels
         public ICommand NavigateToItemCommand { get; }
         public ICommand NavigateToProductItemCommand { get; }
         public ICommand NavigateToHistoryCommand { get; }
+        public ICommand NavigateToForceGaugeCommand { get; }
         public ICommand ExitCommand { get; }
     }
 }
