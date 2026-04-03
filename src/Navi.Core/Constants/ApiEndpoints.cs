@@ -6,7 +6,7 @@ namespace Navi.Core.Constants
     /// </summary>
     public static class ApiEndpoints
     {
-        public const string BaseUrl = "https://localhost:7025/api";
+        public const string BaseUrl = "http://192.168.100.100:8679/api/";
 
         // ── NaviProducts ─────────────────────────────────────────────
         public const string NaviProducts             = "naviproducts";

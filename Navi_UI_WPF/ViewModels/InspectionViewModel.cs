@@ -6,24 +6,17 @@ using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Navi.Application.Services;
-using Navi.Infrastructure.Repositories;
 
 namespace Navi_UI_WPF.ViewModels
 {
     /// <summary>
-    /// ViewModel chính cho Product Assembly View
-    /// Main ViewModel for Product Assembly View
+    /// ViewModel chính cho Inspection View (Kiểm tra chất lượng)
     /// </summary>
-    public class ProductAssemblyViewModel : ObservableObject
+    public class InspectionViewModel : ObservableObject
     {
-        private readonly ProductAssemblyService _service;
-        
         private int _productId;
         private string _productName;
         private string _description;
-        private DateTime _createdDate;
-        private DateTime _updatedDate;
         
         private ObservableCollection<AssemblyStepViewModel> _steps;
         private AssemblyStepViewModel _currentStep;
@@ -33,22 +26,21 @@ namespace Navi_UI_WPF.ViewModels
         private string _errorMessage;
         private bool _hasError;
 
-        public ProductAssemblyViewModel()
+        public InspectionViewModel()
         {
-            // Initialize service (in production, use DI)
-            var repository = new ProductAssemblyRepository();
-            _service = new ProductAssemblyService(repository);
-            
             Steps = new ObservableCollection<AssemblyStepViewModel>();
             StepsView = System.Windows.Data.CollectionViewSource.GetDefaultView(Steps);
             StepsView.Filter = FilterSteps;
             
-            // Initialize commands
+            // Khởi tạo các commands theo đúng chuẩn .NET 4.7.2 (không dùng Source Generator)
             NextStepCommand             = new RelayCommand(NextStep, CanGoNext);
             PreviousStepCommand         = new RelayCommand(PreviousStep, CanGoPrevious);
             JumpToStepCommand           = new RelayCommand<AssemblyStepViewModel>(JumpToStep);
-            LoadDataCommand             = new RelayCommand<int>(async id => await LoadProductAssemblyAsync(id));
+            LoadDataCommand             = new RelayCommand<int>(async id => await LoadInspectionDataAsync(id));
             ToggleStepCompletionCommand = new RelayCommand(ToggleCurrentStepCompletion);
+            
+            // Tạm thời load dữ liệu mẫu
+            LoadSampleData();
         }
 
         #region Properties
@@ -56,34 +48,31 @@ namespace Navi_UI_WPF.ViewModels
         private string _searchText;
         public string SearchText
         {
-             get => _searchText;
-             set
-             {
-                 if (SetProperty(ref _searchText, value))
-                 {
-                     // If input is a number, jump to that step and DO NOT filter
-                     if (int.TryParse(_searchText, out int stepNumber))
-                     {
-                         // Jump to step (1-based index to 0-based)
-                         int index = stepNumber - 1;
-                         if (index >= 0 && index < TotalSteps)
-                         {
-                             CurrentStepIndex = index;
-                         }
-                         // Disable filter so user can see context
-                         StepsView.Filter = null; 
-                     }
-                     else
-                     {
-                         // If input is text, apply filter
-                         StepsView.Filter = FilterSteps;
-                     }
-                     StepsView.Refresh();
-                 }
-             }
+            get => _searchText;
+            set
+            {
+                if (SetProperty(ref _searchText, value))
+                {
+                    if (int.TryParse(_searchText, out int stepNumber))
+                    {
+                        int index = stepNumber - 1;
+                        if (index >= 0 && index < TotalSteps)
+                        {
+                            CurrentStepIndex = index;
+                        }
+                        StepsView.Filter = null; 
+                    }
+                    else
+                    {
+                        StepsView.Filter = FilterSteps;
+                    }
+                    StepsView.Refresh();
+                }
+            }
         }
 
         public System.ComponentModel.ICollectionView StepsView { get; private set; }
+        
         private string _poNumber;
         public string PoNumber
         {
@@ -109,18 +98,6 @@ namespace Navi_UI_WPF.ViewModels
             set => SetProperty(ref _description, value);
         }
 
-        public DateTime CreatedDate
-        {
-            get => _createdDate;
-            set => SetProperty(ref _createdDate, value);
-        }
-
-        public DateTime UpdatedDate
-        {
-            get => _updatedDate;
-            set => SetProperty(ref _updatedDate, value);
-        }
-
         public ObservableCollection<AssemblyStepViewModel> Steps
         {
             get => _steps;
@@ -134,7 +111,6 @@ namespace Navi_UI_WPF.ViewModels
             {
                 if (SetProperty(ref _currentStep, value))
                 {
-                    // Sync Index if needed
                     if (_currentStep != null)
                     {
                         var index = Steps.IndexOf(_currentStep);
@@ -144,7 +120,6 @@ namespace Navi_UI_WPF.ViewModels
                             OnPropertyChanged(nameof(CurrentStepIndex));
                         }
                         
-                        // Update visual state (IsCurrent)
                         foreach (var step in Steps) step.IsCurrent = false;
                         _currentStep.IsCurrent = true;
                     }
@@ -153,7 +128,6 @@ namespace Navi_UI_WPF.ViewModels
                     OnPropertyChanged(nameof(HasCurrentStep));
                     OnPropertyChanged(nameof(ProgressPercentage));
                 }
-
             }
         }
 
@@ -215,7 +189,6 @@ namespace Navi_UI_WPF.ViewModels
             set => SetProperty(ref _hasError, value);
         }
 
-
         #endregion
 
         #region Commands
@@ -230,60 +203,23 @@ namespace Navi_UI_WPF.ViewModels
 
         #region Methods
 
-        /// <summary>
-        /// Load product assembly data from API
-        /// </summary>
-        public async Task LoadProductAssemblyAsync(int productId)
+        public async Task LoadInspectionDataAsync(int productId)
         {
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
                 
-                var dto = await _service.GetProductAssemblyByIdAsync(productId);
+                // TODO: Gọi Service lấy API thực tế, tương tự như ProductAssemblyService
+                await Task.Delay(500); // Giả lập gọi API
                 
-                ProductId = dto.Id;
-                ProductName = dto.ProductName;
-                Description = dto.Description;
-                CreatedDate = dto.Cdt;
-                UpdatedDate = dto.Udt;
-                
-                // Map items to ViewModels
-                Steps.Clear();
-                foreach (var item in dto.Items)
-                {
-                    Steps.Add(new AssemblyStepViewModel
-                    {
-                        Id = item.Id,
-                        Description = item.Description,
-                        Note = item.Note,
-                        Bolts = item.Bolts,
-                        Force = item.Force,
-                        Images = item.Images,
-                        Type = item.Type,
-                        IsCompleted = false,
-                        IsCurrent = false,
-                        StepNumber = Steps.Count + 1 // Ensure StepNumber is populated
-                    });
-                }
-                
-                // Set first step as current
-                if (Steps.Count > 0)
-                {
-                    CurrentStepIndex = 0;
-                }
-                
-                OnPropertyChanged(nameof(TotalSteps));
-                NextStepCommand?.NotifyCanExecuteChanged();
-                PreviousStepCommand?.NotifyCanExecuteChanged();
+                LoadSampleData();
             }
             catch (Exception ex)
             {
-                // FALLBACK: Load Sample Data if API fails (for testing/demo)
                 LoadSampleData();
-                ErrorMessage = $"Không thể kết nối API ({ex.Message}). Đang hiển thị dữ liệu mẫu.";
-                HasError = false; 
-                MessageBox.Show($"Không thể kết nối API: {ex.Message}.\nĐang hiển thị dữ liệu mẫu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                ErrorMessage = $"Lỗi kết nối ({ex.Message}). Hiển thị dữ liệu mẫu.";
+                HasError = true;
             }
             finally
             {
@@ -293,22 +229,19 @@ namespace Navi_UI_WPF.ViewModels
 
         private void LoadSampleData()
         {
-            ProductId = 999;
-            ProductName = "LX15(all) - Cụm Lắp Ráp Mẫu";
-            Description = "Hướng dẫn lắp ráp bộ phận đường sắt mẫu (Sample Data)";
-            CreatedDate = DateTime.Now;
-            UpdatedDate = DateTime.Now;
+            ProductId = 1001;
+            ProductName = "Sản phẩm kiểm tra Mẫu X1";
+            Description = "Quy trình kiểm tra chất lượng (OQC/IQC) cho sản phẩm X1";
 
             Steps.Clear();
             
-            // Using placeholder images for demonstration
             Steps.Add(new AssemblyStepViewModel
             {
                 Id = 1,
-                Description = "Chuẩn bị Jig và các linh kiện cần thiết. Kiểm tra sạch sẽ bề mặt làm việc.",
-                Note = "Đảm bảo Jig không bị dính dầu mỡ.",
-                Images = "https://placehold.co/800x600/png?text=B1+Chuan+Bi", 
-                Type = "Preparation",
+                Description = "Kiểm tra ngoại quan",
+                Note = "Kiểm tra trầy xước, móp méo trên bề mặt.",
+                Images = "https://placehold.co/800x600/png?text=B1+Ngoai+Quan", 
+                Type = "Inspection",
                 IsCompleted = true,
                 IsCurrent = false,
                 StepNumber = 1
@@ -317,9 +250,10 @@ namespace Navi_UI_WPF.ViewModels
             Steps.Add(new AssemblyStepViewModel
             {
                 Id = 2,
-                Description = "Gá Rail lên Jig. Chú ý hướng lắp ráp theo chiều mũi tên trên Jig.",
-                Images = "https://placehold.co/800x600/png?text=B2+Ga+Rail",
-                Type = "Assembly",
+                Description = "Đo kích thước cơ bản",
+                Note = "Dùng thước kẹp đảm bảo kích thước chốt (D=5mm ±0.1).",
+                Images = "https://placehold.co/800x600/png?text=B2+Kich+Thuoc",
+                Type = "Measurement",
                 IsCompleted = true,
                 IsCurrent = false,
                 StepNumber = 2
@@ -328,10 +262,10 @@ namespace Navi_UI_WPF.ViewModels
             Steps.Add(new AssemblyStepViewModel
             {
                 Id = 3,
-                Description = "Gắn Retuncap vào hai đầu Rail. Đảm bảo khớp nối khít, không bị hở.",
-                Note = "Kiểm tra kỹ lưỡng khớp nối.",
-                Images = "https://placehold.co/800x600/png?text=B3+Gan+Retuncap", 
-                Type = "Assembly",
+                Description = "Kiểm tra chức năng hoạt động",
+                Note = "Cắm nguồn test đèn LED và âm thanh.",
+                Images = "https://placehold.co/800x600/png?text=B3+Chuc+Nang", 
+                Type = "Functional Test",
                 IsCompleted = false,
                 IsCurrent = false,
                 StepNumber = 3
@@ -340,43 +274,17 @@ namespace Navi_UI_WPF.ViewModels
             Steps.Add(new AssemblyStepViewModel
             {
                 Id = 4,
-                Description = "Siết ốc cố định Retuncap. Sử dụng ốc M1.7x6. Siết lực vừa đủ.",
-                Bolts = "M1.7x6 (4 cái)",
-                Force = "100 cN.m",
-                Images = "https://placehold.co/800x600/png?text=B4+Siet+Oc",
-                Type = "Fastening",
+                Description = "Đóng dấu Pass/Fail và dán tem",
+                Note = "Chỉ dán tem xanh nếu qua hết các bước trên.",
+                Images = "https://placehold.co/800x600/png?text=B4+Dan+Tem",
+                Type = "Finishing",
                 IsCompleted = false,
                 IsCurrent = false,
                 StepNumber = 4
             });
 
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 5,
-                Description = "Kiểm tra hoạt động trượt của Block trên Rail. Phải trượt êm, không bị kẹt.",
-                Note = "Nếu bị kẹt, tháo ra kiểm tra lại bước 3.",
-                Images = "https://placehold.co/800x600/png?text=B5+Kiem+Tra",
-                Type = "Inspection",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 5
-            });
-            
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 6,
-                Description = "Dán tem bảo hành và mã sản phẩm lên mặt dưới của Block.",
-                Images = "https://placehold.co/800x600/png?text=B6+Dan+Tem",
-                Type = "Finishing",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 6
-            });
-
-            // Set current step to the first incomplete step
             CurrentStepIndex = 2; // Step 3
             
-            // Notify UI of changes
             OnPropertyChanged(nameof(TotalSteps));
             OnPropertyChanged(nameof(CompletedStepsCount));
             OnPropertyChanged(nameof(ProgressPercentage));
@@ -387,13 +295,11 @@ namespace Navi_UI_WPF.ViewModels
 
         private void UpdateCurrentStep()
         {
-            // Reset all steps
             foreach (var step in Steps)
             {
                 step.IsCurrent = false;
             }
             
-            // Set current step
             if (CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count)
             {
                 CurrentStep = Steps[CurrentStepIndex];
@@ -401,31 +307,11 @@ namespace Navi_UI_WPF.ViewModels
             }
         }
 
-        private bool CanGoNext()
-        {
-            return CurrentStepIndex < TotalSteps - 1;
-        }
+        private bool CanGoNext() => CurrentStepIndex < TotalSteps - 1;
+        private void NextStep() { if (CanGoNext()) CurrentStepIndex++; }
 
-        private void NextStep()
-        {
-            if (CanGoNext())
-            {
-                CurrentStepIndex++;
-            }
-        }
-
-        private bool CanGoPrevious()
-        {
-            return CurrentStepIndex > 0;
-        }
-
-        private void PreviousStep()
-        {
-            if (CanGoPrevious())
-            {
-                CurrentStepIndex--;
-            }
-        }
+        private bool CanGoPrevious() => CurrentStepIndex > 0;
+        private void PreviousStep() { if (CanGoPrevious()) CurrentStepIndex--; }
 
         private void JumpToStep(AssemblyStepViewModel step)
         {

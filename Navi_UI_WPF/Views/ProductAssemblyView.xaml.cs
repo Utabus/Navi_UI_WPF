@@ -17,5 +17,13 @@ namespace Navi_UI_WPF.Views
                 _ = vm.LoadProductAssemblyAsync(1);
             }
         }
+
+        private void StepsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (StepsDataGrid.SelectedItem != null)
+            {
+                StepsDataGrid.ScrollIntoView(StepsDataGrid.SelectedItem);
+            }
+        }
     }
 }

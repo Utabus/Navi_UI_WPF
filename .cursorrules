@@ -1,0 +1,37 @@
+# System Instructions for AI Assistant
+
+You are working in the `Navi_UI_WPF` project.
+
+When writing or modifying code in this project, you MUST strictly follow these rules. Read them carefully before you respond.
+
+## 1. Tech Stack & Environment
+- **WPF Application** targeting **.NET Framework 4.7.2**.
+- Uses `CommunityToolkit.Mvvm` (v8.2.2), `LiveCharts.Wpf`, and `HandyControls`.
+
+## 2. MVVM & Source Generators (CRITICAL)
+- Because this is **.NET 4.7.2**, **Source Generators DO NOT WORK**.
+- **NEVER** use `[ObservableProperty]` or `[RelayCommand]`.
+- **Properties:** You MUST write full getter/setter properties and call `SetProperty()`.
+  ```csharp
+  private string _name;
+  public string Name { get => _name; set => SetProperty(ref _name, value); }
+  ```
+- **Commands:** You MUST instantiate them manually in the constructor.
+  ```csharp
+  public IRelayCommand SaveCommand { get; }
+  // In constructor: SaveCommand = new RelayCommand(ExecuteSave);
+  ```
+
+## 3. UI Threading
+- Any updates to ObservableCollections or UI-bound properties originating from Serial Port events or `Task.Run` must be wrapped in:
+  ```csharp
+  System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() => { ... }));
+  ```
+
+## 4. Architecture
+- Keep UI concerns in the `Navi_UI_WPF` project.
+- Data fetching, Services, and API integrations belong in `Navi.Infrastructure`.
+- API endpoints map directly to backend: `/api/naviproducts`, `/api/naviitems`, etc.
+- Never use physical deletes; use `IsDelete = true` (Soft Delete).
+
+For more detailed context, always refer to the `.rules/` folder and `CONTEXT.md` at the root of the workspace.

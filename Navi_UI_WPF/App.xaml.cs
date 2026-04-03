@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -48,6 +48,11 @@ namespace Navi_UI_WPF
                 Serilog.Log.Fatal(args.Exception, "Unobserved Task Exception (Lỗi trong Task chạy ngầm)");
                 args.SetObserved();
             };
+
+            // Hiển thị màn hình Login — MainWindow sẽ được mở bởi LoginView.xaml.cs
+            // sau khi xác thực thành công.
+            var loginWindow = new Navi_UI_WPF.Views.LoginView();
+            loginWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)

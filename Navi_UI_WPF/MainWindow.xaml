@@ -1,4 +1,4 @@
-﻿<Window
+<Window
     x:Class="Navi_UI_WPF.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -36,6 +36,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ForceGaugeViewModel}">
             <views:ForceGaugeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InsertBallViewModel}">
+            <views:InsertBallView />
         </DataTemplate>
     </Window.Resources>
 
@@ -131,7 +134,8 @@
 
 
                 <!--  Menu Items  -->
-                <StackPanel Grid.Row="2">
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
                     <StackPanel.Resources>
                         <Style BasedOn="{StaticResource {x:Type RadioButton}}" TargetType="RadioButton">
                             <Setter Property="Background" Value="Transparent" />
@@ -186,41 +190,124 @@
                         Command="{Binding NavigateToAssemblyCommand}"
                         Content="Lắp Ráp Sản Phẩm"
                         Tag="📦" />
+                    <RadioButton
+                        Command="{Binding NavigateToAssemblyCommand}"
+                        Content="Inspection"
+                        Tag="📦" />
+                    <RadioButton
+                        Command="{Binding NavigateToAssemblyCommand}"
+                        Content="Packing"
+                        Tag="📦" />
 
+                    <!--  SubLeader+ only: Quản lý Sản phẩm  -->
                     <RadioButton
                         Command="{Binding NavigateToProductCommand}"
                         Content="Quản lý Sản phẩm"
-                        Tag="🗂️" />
+                        Tag="🗂️"
+                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
+                    <!--  SubLeader+ only: Bước lắp ráp  -->
                     <RadioButton
                         Command="{Binding NavigateToItemCommand}"
                         Content="Bước lắp ráp"
-                        Tag="🔧" />
+                        Tag="🔧"
+                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
+                    <!--  SubLeader+ only: Liên kết SP-Bước  -->
                     <RadioButton
                         Command="{Binding NavigateToProductItemCommand}"
                         Content="Liên kết SP-Bước"
-                        Tag="🔗" />
+                        Tag="🔗"
+                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
+                    <!--  SubLeader+ only: Lịch sử thao tác  -->
                     <RadioButton
                         Command="{Binding NavigateToHistoryCommand}"
                         Content="Lịch sử thao tác"
-                        Tag="📋" />
+                        Tag="📋"
+                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
+                    <!--  Tất cả: Force Gauge  -->
                     <RadioButton
                         Command="{Binding NavigateToForceGaugeCommand}"
                         Content="Force Gauge"
                         Tag="📈" />
 
+                    <RadioButton
+                        Command="{Binding NavigateToInsertBallCommand}"
+                        Content="Insert Ball"
+                        Tag="🔵" />
+
                     <RadioButton Content="RS232" Tag="⚙️" />
+                    <!--  Tất cả: Cài Đặt  -->
                     <RadioButton Content="Cài Đặt" Tag="⚙️" />
 
+                    <!--  Tất cả: Trợ Giúp  -->
                     <RadioButton Content="Trợ Giúp" Tag="❓" />
-                </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
 
 
                 <!--  Bottom Actions  -->
-                <StackPanel Grid.Row="3" Margin="0,0,0,20">
+                <StackPanel Grid.Row="3" Margin="0,0,0,10">
+
+                    <!--  User Info Card (chỉ hiện khi menu mở)  -->
+                    <Border
+                        Margin="10,0,10,10"
+                        Padding="10,8"
+                        Background="#0D47A1"
+                        CornerRadius="6"
+                        Visibility="{Binding IsMenuOpen, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    FontSize="14"
+                                    Foreground="#90CAF9"
+                                    Text="👤 " />
+                                <TextBlock
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="White"
+                                    Text="{Binding CurrentUserName}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <TextBlock
+                                Margin="20,2,0,0"
+                                FontSize="11"
+                                Foreground="#64B5F6"
+                                Text="{Binding CurrentUserRole}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  Logout Button  -->
+                    <Button
+                        HorizontalContentAlignment="Left"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Command="{Binding LogoutCommand}"
+                        Foreground="#EF9A9A">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Width="24"
+                                HorizontalAlignment="Center"
+                                FontSize="14"
+                                Text="🔓" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="15,0,0,0"
+                                VerticalAlignment="Center"
+                                Text="Đăng Xuất"
+                                FontSize="14"
+                                Visibility="{Binding IsMenuOpen, Converter={StaticResource BoolToVisibility}}" />
+                        </Grid>
+                    </Button>
+
+                    <!--  Exit Button  -->
                     <Button
                         HorizontalContentAlignment="Left"
                         Background="Transparent"
@@ -236,11 +323,14 @@
                                 Grid.Column="0"
                                 Width="24"
                                 HorizontalAlignment="Center"
+                                FontSize="14"
                                 Text="🚪" />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="15,0,0,0"
+                                VerticalAlignment="Center"
                                 Text="Thoát"
+                                FontSize="14"
                                 Visibility="{Binding IsMenuOpen, Converter={StaticResource BoolToVisibility}}" />
                         </Grid>
                     </Button>

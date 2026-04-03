@@ -42,7 +42,7 @@ namespace Navi.Infrastructure.Repositories
         {
             try
             {
-                var endpoint = string.Format(ApiEndpoints.NaviProductItems, productId);
+                var endpoint = string.Format(ApiEndpoints.NaviProductWithItems, productId);
                 var response = await _httpClient.GetAsync(endpoint);
                 
                 response.EnsureSuccessStatusCode();

@@ -73,6 +73,7 @@
       <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
@@ -115,6 +116,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Utils\Data_FG.cs" />
+    <Compile Include="ViewModels\InspectionViewModel.cs" />
+    <Compile Include="ViewModels\PackingViewModel.cs" />
+    <Compile Include="Views\InsertBallView.xaml.cs">
+      <DependentUpon>InsertBallView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\InspectionView.xaml.cs">
+      <DependentUpon>InspectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PackingView.xaml.cs">
+      <DependentUpon>PackingView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TestUC.xaml.cs">
       <DependentUpon>TestUC.xaml</DependentUpon>
     </Compile>
@@ -125,6 +138,14 @@
     <Page Include="Views\HomeView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\InsertBallView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\InspectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NaviHistoryView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -146,6 +167,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\PackingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ProductAssemblyView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -166,23 +191,28 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-
     <Compile Include="Converters\ValueConverters.cs" />
     <Compile Include="Helpers\LoggerHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models\AuthModels.cs" />
+    <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\SessionManager.cs" />
     <Compile Include="ViewModels\AssemblyStepViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
+    <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\NaviHistoryViewModel.cs" />
     <Compile Include="ViewModels\NaviItemViewModel.cs" />
     <Compile Include="ViewModels\NaviProductItemViewModel.cs" />
     <Compile Include="ViewModels\NaviProductViewModel.cs" />
     <Compile Include="ViewModels\ProductAssemblyViewModel.cs" />
-
     <Compile Include="ViewModels\ForceGaugeViewModel.cs" />
+    <Compile Include="ViewModels\SizeBallOption.cs" />
+    <Compile Include="ViewModels\TableOption.cs" />
+    <Compile Include="ViewModels\InsertBallViewModel.cs" />
     <Compile Include="Views\ForceGaugeView.xaml.cs">
       <DependentUpon>ForceGaugeView.xaml</DependentUpon>
     </Compile>
@@ -211,6 +241,13 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\LoginView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="Views\LoginView.xaml.cs">
+      <DependentUpon>LoginView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
