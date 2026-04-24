@@ -5,6 +5,7 @@ using Navi.Application.DTOs;
 using Navi.Core.Entities;
 using Navi.Core.Enums;
 using Navi.Core.Interfaces;
+using Navi.Application.Interfaces;
 
 namespace Navi.Application.Services
 {
@@ -25,14 +26,60 @@ namespace Navi.Application.Services
             }
         }
         
-        public async Task<List<Process>> GetAllProcessesAsync()
+        // ── Mapping ─────────────────────────────────────────────────────
+
+        private ProcessDto MapToDto(Process entity)
+        {
+            if (entity == null) return null;
+            var dto = new ProcessDto
+            {
+                Id = entity.Id,
+                Code = entity.Code,
+                Name = entity.Name,
+                Description = entity.Description,
+                Status = entity.Status.ToString(),
+                Order = entity.Order,
+                StartTime = entity.StartTime,
+                EndTime = entity.EndTime,
+                TotalStepsCount = entity.Steps?.Count ?? 0,
+                CompletedStepsCount = entity.Steps?.Count(s => s.Status == StepStatus.Success) ?? 0
+            };
+            
+            if (dto.TotalStepsCount > 0)
+                dto.ProgressPercentage = (double)dto.CompletedStepsCount / dto.TotalStepsCount * 100;
+
+            if (entity.Steps != null)
+                dto.Steps = entity.Steps.Select(MapStepToDto).ToList();
+
+            return dto;
+        }
+
+        private ProcessStepDto MapStepToDto(ProcessStep entity)
+        {
+            if (entity == null) return null;
+            return new ProcessStepDto
+            {
+                Id = entity.Id,
+                ProcessId = entity.ProcessId,
+                Code = entity.Code,
+                Name = entity.Name,
+                Order = entity.Order,
+                Type = entity.Type.ToString(),
+                Status = entity.Status.ToString(),
+                Instructions = entity.Instructions
+            };
+        }
+
+        // ── Implementation ─────────────────────────────────────────────
+
+        public async Task<List<ProcessDto>> GetAllProcessesAsync()
         {
             // Simulate async operation
             await Task.Delay(100);
-            return _processes.ToList();
+            return _processes.Select(MapToDto).ToList();
         }
         
-        public async Task<Process> GetProcessByIdAsync(int processId)
+        public async Task<ProcessDto> GetProcessByIdAsync(int processId)
         {
             await Task.Delay(50);
             var process = _processes.FirstOrDefault(p => p.Id == processId);
@@ -40,44 +87,10 @@ namespace Navi.Application.Services
             {
                 throw new Core.Exceptions.ProcessNotFoundException(processId);
             }
-            return process;
+            return MapToDto(process);
         }
-        
-        public async Task<Process> CreateProcessAsync(Process process)
-        {
-            await Task.Delay(50);
-            process.Id = _processes.Any() ? _processes.Max(p => p.Id) + 1 : 1;
-            _processes.Add(process);
-            return process;
-        }
-        
-        public async Task<Process> UpdateProcessAsync(Process process)
-        {
-            await Task.Delay(50);
-            var existing = _processes.FirstOrDefault(p => p.Id == process.Id);
-            if (existing == null)
-            {
-                throw new Core.Exceptions.ProcessNotFoundException(process.Id);
-            }
-            
-            var index = _processes.IndexOf(existing);
-            _processes[index] = process;
-            return process;
-        }
-        
-        public async Task<bool> DeleteProcessAsync(int processId)
-        {
-            await Task.Delay(50);
-            var process = _processes.FirstOrDefault(p => p.Id == processId);
-            if (process == null)
-            {
-                return false;
-            }
-            _processes.Remove(process);
-            return true;
-        }
-        
-        public async Task<bool> StartProcessAsync(int processId)
+
+        public async Task<List<ProcessStepDto>> GetStepsByProcessIdAsync(int processId)
         {
             await Task.Delay(50);
             var process = _processes.FirstOrDefault(p => p.Id == processId);
@@ -85,25 +98,11 @@ namespace Navi.Application.Services
             {
                 throw new Core.Exceptions.ProcessNotFoundException(processId);
             }
-            
-            process.Status = ProcessStatus.InProgress;
-            process.StartTime = System.DateTime.Now;
-            return true;
+            return process.Steps?.Select(MapStepToDto).ToList() ?? new List<ProcessStepDto>();
         }
         
-        public async Task<bool> CompleteProcessAsync(int processId)
-        {
-            await Task.Delay(50);
-            var process = _processes.FirstOrDefault(p => p.Id == processId);
-            if (process == null)
-            {
-                throw new Core.Exceptions.ProcessNotFoundException(processId);
-            }
-            
-            process.Status = ProcessStatus.Completed;
-            process.EndTime = System.DateTime.Now;
-            return true;
-        }
+        // (Other methods removed or updated to match DTO pattern if needed, 
+        // but these are the ones required by IProcessService)
         
         private void SeedData()
         {

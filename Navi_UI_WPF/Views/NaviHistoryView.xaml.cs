@@ -4,9 +4,10 @@ namespace Navi_UI_WPF.Views
 {
     public partial class NaviHistoryView : UserControl
     {
-        public NaviHistoryView()
+        public NaviHistoryView(ViewModels.NaviHistoryViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using Navi_UI_WPF.Services;
 using Navi_UI_WPF.Views;
 
@@ -9,8 +10,23 @@ namespace Navi_UI_WPF.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        public MainViewModel()
+        private readonly System.IServiceProvider _serviceProvider;
+
+        public MainViewModel(
+            System.IServiceProvider serviceProvider,
+            HomeView homeView,
+            ProductAssemblyView assemblyView,
+            NaviProductView productView,
+            NaviItemView itemView,
+            NaviProductItemView productItemView,
+            NaviHistoryView historyView,
+            ForceGaugeView forceGaugeView,
+            InsertBallView insertBallView,
+            InspectionView inspectionView,
+            PackingView packingView)
         {
+            _serviceProvider = serviceProvider;
+
             // Lấy thông tin từ SessionManager (đã set sau khi login)
             var session = SessionManager.Instance;
             _currentUserName = session.CurrentUser?.UserName ?? "Unknown";
@@ -18,18 +34,21 @@ namespace Navi_UI_WPF.ViewModels
             _isFullAccess = session.IsFullAccess;
 
             // Default view
-            CurrentView = new HomeViewModel();
+            CurrentView = homeView;
             IsMenuOpen = true;
 
             // Navigation Commands
-            NavigateToHomeCommand        = new RelayCommand(() => CurrentView = new HomeViewModel());
-            NavigateToAssemblyCommand    = new RelayCommand(() => CurrentView = new ProductAssemblyViewModel());
-            NavigateToProductCommand     = new RelayCommand(() => CurrentView = new NaviProductViewModel());
-            NavigateToItemCommand        = new RelayCommand(() => CurrentView = new NaviItemViewModel());
-            NavigateToProductItemCommand = new RelayCommand(() => CurrentView = new NaviProductItemViewModel());
-            NavigateToHistoryCommand     = new RelayCommand(() => CurrentView = new NaviHistoryViewModel());
-            NavigateToForceGaugeCommand  = new RelayCommand(() => CurrentView = new ForceGaugeViewModel());
-            NavigateToInsertBallCommand  = new RelayCommand(() => CurrentView = new InsertBallViewModel());
+            NavigateToHomeCommand        = new RelayCommand(() => CurrentView = homeView);
+            NavigateToAssemblyCommand    = new RelayCommand(() => CurrentView = assemblyView);
+            NavigateToProductCommand     = new RelayCommand(() => CurrentView = productView);
+            NavigateToItemCommand        = new RelayCommand(() => CurrentView = itemView);
+            NavigateToProductItemCommand = new RelayCommand(() => CurrentView = productItemView);
+            NavigateToHistoryCommand     = new RelayCommand(() => CurrentView = historyView);
+            NavigateToForceGaugeCommand  = new RelayCommand(() => CurrentView = forceGaugeView);
+            NavigateToInsertBallCommand  = new RelayCommand(() => CurrentView = insertBallView);
+            NavigateToInspectionCommand  = new RelayCommand(() => CurrentView = inspectionView);
+            NavigateToPackingCommand     = new RelayCommand(() => CurrentView = packingView);
+            
             ExitCommand                  = new RelayCommand(() => Application.Current.Shutdown());
             ToggleMenuCommand            = new RelayCommand(() => IsMenuOpen = !IsMenuOpen);
             LogoutCommand                = new RelayCommand(ExecuteLogout);
@@ -89,6 +108,8 @@ namespace Navi_UI_WPF.ViewModels
         public ICommand NavigateToHistoryCommand { get; }
         public ICommand NavigateToForceGaugeCommand { get; }
         public ICommand NavigateToInsertBallCommand { get; }
+        public ICommand NavigateToInspectionCommand { get; }
+        public ICommand NavigateToPackingCommand { get; }
         public ICommand ExitCommand { get; }
         public ICommand LogoutCommand { get; }
 
@@ -118,8 +139,8 @@ namespace Navi_UI_WPF.ViewModels
             {
                 SessionManager.Instance.ClearSession();
 
-                // Mở lại màn hình Login
-                var loginWindow = new LoginView();
+                // Mở lại màn hình Login từ DI
+                var loginWindow = _serviceProvider.GetRequiredService<LoginView>();
                 Application.Current.MainWindow = loginWindow;
                 loginWindow.Show();
 

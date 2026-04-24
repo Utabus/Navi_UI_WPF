@@ -33,5 +33,6 @@ When writing or modifying code in this project, you MUST strictly follow these r
 - Data fetching, Services, and API integrations belong in `Navi.Infrastructure`.
 - API endpoints map directly to backend: `/api/naviproducts`, `/api/naviitems`, etc.
 - Never use physical deletes; use `IsDelete = true` (Soft Delete).
+- **Manual Project Management (FIX):** Because this is a **Legacy .NET Framework project**, new files are **NOT** automatically included. You **MUST** manually add a `<Compile Include="..." />` entry to the `.csproj` file for every new `.cs` file created.
 
 For more detailed context, always refer to the `.rules/` folder and `CONTEXT.md` at the root of the workspace.

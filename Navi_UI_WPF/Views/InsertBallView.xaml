@@ -10,10 +10,6 @@
              d:DesignHeight="700" d:DesignWidth="1100"
              Background="{StaticResource BackgroundBrush}">
 
-    <UserControl.DataContext>
-        <vm:InsertBallViewModel />
-    </UserControl.DataContext>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" /> <!-- Header -->

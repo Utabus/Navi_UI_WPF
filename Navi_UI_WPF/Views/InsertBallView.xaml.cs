@@ -4,9 +4,10 @@ namespace Navi_UI_WPF.Views
 {
     public partial class InsertBallView : UserControl
     {
-        public InsertBallView()
+        public InsertBallView(ViewModels.InsertBallViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
         }
     }
 }

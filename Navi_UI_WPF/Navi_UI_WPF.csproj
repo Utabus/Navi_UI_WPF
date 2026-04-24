@@ -98,6 +98,18 @@
     <Reference Include="CommunityToolkit.Mvvm">
       <HintPath>..\packages\CommunityToolkit.Mvvm.8.2.2\lib\netstandard2.0\CommunityToolkit.Mvvm.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.8.0.0\lib\net462\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.8.0.0\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <!-- LiveCharts2 -->
   </ItemGroup>
   <!-- Native SkiaSharp / HarfBuzzSharp runtimes: copy to output dir -->
@@ -119,6 +131,8 @@
     <Compile Include="Utils\Data_FG.cs" />
     <Compile Include="ViewModels\InspectionViewModel.cs" />
     <Compile Include="ViewModels\PackingViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\InsertBallView.xaml.cs">
       <DependentUpon>InsertBallView.xaml</DependentUpon>
     </Compile>
@@ -175,6 +189,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\NgReasonDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\ForceGaugeView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -199,15 +217,18 @@
     </Compile>
     <Compile Include="Models\AuthModels.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\DeviceService.cs" />
+    <Compile Include="Services\IAuthService.cs" />
     <Compile Include="Services\SessionManager.cs" />
     <Compile Include="ViewModels\AssemblyStepViewModel.cs" />
+    <Compile Include="ViewModels\BaseAssemblyViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\NaviHistoryViewModel.cs" />
     <Compile Include="ViewModels\NaviItemViewModel.cs" />
     <Compile Include="ViewModels\NaviProductItemViewModel.cs" />
     <Compile Include="ViewModels\NaviProductViewModel.cs" />
+    <Compile Include="ViewModels\NgReasonViewModel.cs" />
     <Compile Include="ViewModels\ProductAssemblyViewModel.cs" />
     <Compile Include="ViewModels\ForceGaugeViewModel.cs" />
     <Compile Include="ViewModels\SizeBallOption.cs" />
@@ -233,6 +254,9 @@
     </Compile>
     <Compile Include="Views\NaviProductView.xaml.cs">
       <DependentUpon>NaviProductView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NgReasonDialog.xaml.cs">
+      <DependentUpon>NgReasonDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProductAssemblyView.xaml.cs">
       <DependentUpon>ProductAssemblyView.xaml</DependentUpon>

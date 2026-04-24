@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Extensions.DependencyInjection;
+using Navi_UI_WPF.ViewModels;
 
 namespace Navi_UI_WPF
 {
@@ -20,11 +22,13 @@ namespace Navi_UI_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IServiceProvider serviceProvider;
+        public MainWindow( IServiceProvider serviceProvider)
         {
             InitializeComponent();
-        }
+            this.serviceProvider = serviceProvider;
+            DataContext = serviceProvider.GetRequiredService<MainViewModel>();
 
-      
+        }
     }
 }

@@ -10,9 +10,6 @@
     d:DesignWidth="1100"
     Background="{StaticResource BackgroundBrush}"
     mc:Ignorable="d">
-    <UserControl.DataContext>
-        <vm:NaviHistoryViewModel />
-    </UserControl.DataContext>
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>

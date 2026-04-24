@@ -1,22 +1,35 @@
+using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
+using Navi_UI_WPF.ViewModels;
 
 namespace Navi_UI_WPF.Views
 {
-    /// <summary>
-    /// Interaction logic for PackingView.xaml
-    /// </summary>
     public partial class PackingView : UserControl
     {
-        public PackingView()
+        public PackingView(PackingViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
+            
+            vm.RequestFocusAction = () =>
+            {
+                Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+                {
+                    PoTextBox.Focus();
+                    Keyboard.Focus(PoTextBox);
+                    PoTextBox.SelectAll();
+                }));
+            };
         }
 
         private void StepsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is DataGrid dg && dg.SelectedItem != null)
+            if (StepsDataGrid.SelectedItem != null)
             {
-                dg.ScrollIntoView(dg.SelectedItem);
+                StepsDataGrid.ScrollIntoView(StepsDataGrid.SelectedItem);
             }
         }
     }

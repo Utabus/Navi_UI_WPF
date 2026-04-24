@@ -11,16 +11,34 @@
     d:DesignHeight="800"
     d:DesignWidth="1200"
     Background="#FAFAFA"
-    mc:Ignorable="d">
-
-    <UserControl.DataContext>
-        <vm:ProductAssemblyViewModel />
-    </UserControl.DataContext>
+    mc:Ignorable="d"
+    FocusManager.FocusedElement="{Binding ElementName=PoTextBox}"
+    Loaded="UserControl_Loaded">
+ 
 
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="LocalBoolToVisibility" />
         <conv:NullOrEmptyToVisibilityConverter x:Key="NullOrEmptyToVisibility" />
         <conv:StepStatusToIconConverter x:Key="StepStatusToIcon" />
+
+        <Style x:Key="AssemblyRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource GridRow}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Background" Value="#F1F8E9" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsNg}" Value="True">
+                    <Setter Property="Background" Value="#FFEBEE" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Setter Property="Opacity" Value="0.6" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Background" Value="#E3F2FD" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -41,13 +59,17 @@
                     <!-- Form Title -->
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="20" />
-                    
+
                     <ColumnDefinition Width="Auto" />
                     <!--  PO Label  -->
                     <ColumnDefinition Width="200" />
                     <!--  PO TextBox  -->
                     <ColumnDefinition Width="Auto" />
                     <!--  PO Info Labels  -->
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <!--  Manufa Reference Info  -->
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <!--  Spacer  -->
                     <ColumnDefinition Width="Auto" />
@@ -56,7 +78,7 @@
 
                 <!--  Form Title  -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock FontSize="20" FontWeight="Heavy" Foreground="White" Text="🛠 HƯỚNG DẪN LẮP RÁP" VerticalAlignment="Center" />
+                    <TextBlock FontSize="20" FontWeight="Heavy" Foreground="White" Text="🛠 Assembly" VerticalAlignment="Center" />
                     <Border Width="1" Background="#50FFFFFF" Margin="20,0,0,0" Height="30" VerticalAlignment="Center" />
                 </StackPanel>
 
@@ -72,43 +94,79 @@
 
                 <!--  PO Input TextBox  -->
                 <hc:TextBox
+                    x:Name="PoTextBox"
                     Grid.Column="3"
                     VerticalAlignment="Center"
                     hc:InfoElement.Placeholder="Nhập số PO..."
                     FontSize="13"
-                    Text="{Binding PoNumber, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding PoNumber, UpdateSourceTrigger=PropertyChanged}">
+                    <hc:TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SearchPoCommand}" />
+                    </hc:TextBox.InputBindings>
+                </hc:TextBox>
 
                 <!--  PO Info: số PO + tên hàng  -->
                 <StackPanel
                     Grid.Column="4"
-                    Margin="20,0,0,0"
+                    Margin="0,0,0,0"
                     VerticalAlignment="Center">
-                    <TextBlock
+                    <!--<TextBlock
                         FontSize="10"
                         Foreground="#90CAF9"
-                        Text="Số PO" />
+                        Text="Số PO " />
                     <TextBlock
                         FontSize="14"
                         FontWeight="Bold"
                         Foreground="White"
-                        Text="{Binding PoNumber}" />
+                        Text="{Binding PoNumber}" />-->
+                    <!--<TextBlock
+                    Margin="0,4,0,0"
+                    FontSize="10"
+                    Foreground="#90CAF9"
+                    Text="Tên hàng" />
                     <TextBlock
-                        Margin="0,4,0,0"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="White"
+                    Text="{Binding ProductName}" />-->
+                </StackPanel>
+
+                <!--  Manufa Reference Info  -->
+                <StackPanel
+                    Grid.Column="6"
+                    VerticalAlignment="Center"
+                    Margin="30 0 30 0"
+                    Visibility="{Binding Phtx, Converter={StaticResource NullOrEmptyToVisibility}}">
+                    <TextBlock
                         FontSize="10"
                         Foreground="#90CAF9"
                         Text="Tên hàng" />
-                    <TextBlock
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Foreground="White"
-                        Text="{Binding ProductName}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="{Binding Phtx}" />
+                        <TextBlock
+                            FontSize="14"
+                            Foreground="#B3E5FC"
+                            Text=" — "
+                            Visibility="{Binding Phcd, Converter={StaticResource NullOrEmptyToVisibility}}" />
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Text="{Binding Phcd}" />
+                    </StackPanel>
                 </StackPanel>
 
                 <!--  Step Progress  -->
                 <TextBlock
-                    Grid.Column="6"
+                    Grid.Column="8"
                     VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
                     FontSize="14"
+                    Margin="10 0 0 0"
                     Foreground="#E3F2FD">
                     <Run Text="Bước " />
                     <Run FontWeight="Bold" Text="{Binding CurrentStepNumber, Mode=OneWay}" />
@@ -119,61 +177,27 @@
         </Border>
 
         <!--  Loading Overlay  -->
-        <Grid
-            Grid.Row="1"
-            Panel.ZIndex="999"
-            Background="#80000000"
-            Visibility="{Binding IsLoading, Converter={StaticResource LocalBoolToVisibility}}">
-            <TextBlock
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontSize="18"
-                Foreground="White"
-                Text="⏳ Đang tải dữ liệu..." />
-        </Grid>
 
-        <!--  Error Message  -->
-        <Border
-            Grid.Row="1"
-            Margin="20"
-            Padding="20"
-            Panel.ZIndex="998"
-            Background="#FFEBEE"
-            BorderBrush="#F44336"
-            BorderThickness="2"
-            CornerRadius="6"
-            Visibility="{Binding HasError, Converter={StaticResource LocalBoolToVisibility}}">
-            <StackPanel>
-                <TextBlock
-                    FontSize="16"
-                    FontWeight="Bold"
-                    Foreground="#D32F2F"
-                    Text="⚠️ Lỗi" />
-                <TextBlock
-                    Margin="0,8,0,0"
-                    FontSize="13"
-                    Foreground="#C62828"
-                    Text="{Binding ErrorMessage}"
-                    TextWrapping="Wrap" />
-                <Button
-                    Margin="0,12,0,0"
-                    HorizontalAlignment="Left"
-                    Command="{Binding LoadDataCommand}"
-                    CommandParameter="{Binding ProductId}"
-                    Content="🔄 Thử lại"
-                    Style="{StaticResource BtnGhost}" />
-            </StackPanel>
-        </Border>
 
         <!--  Main Content  -->
         <Grid Grid.Row="1" Margin="8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.5*" />
+                <ColumnDefinition Width="1.5*" MinWidth="250" />
                 <!--  Step List LEFT  -->
-                <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="Auto" />
+                <!--  Splitter  -->
+                <ColumnDefinition Width="4*" MinWidth="500" />
                 <!--  Step Detail RIGHT  -->
             </Grid.ColumnDefinitions>
+
+            <!--  Grid Splitter  -->
+            <GridSplitter
+                Grid.Column="1"
+                Width="6"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                ShowsPreview="True" />
 
             <!--  ══ Step List (LEFT) ═════════════════════════════════════  -->
             <Border
@@ -221,8 +245,10 @@
                         BorderThickness="1"
                         ColumnHeaderStyle="{StaticResource GridHeader}"
                         IsReadOnly="True"
+                        CanUserSortColumns="False"
+                        CanUserReorderColumns="False"
                         ItemsSource="{Binding StepsView}"
-                        RowStyle="{StaticResource GridRow}"
+                        RowStyle="{StaticResource AssemblyRowStyle}"
                         SelectedItem="{Binding CurrentStep, Mode=TwoWay}"
                         Style="{StaticResource CompactGrid}">
                         <DataGrid.Columns>
@@ -239,11 +265,22 @@
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#BDBDBD" />
                                                     <Style.Triggers>
+                                                        <!-- 1. OK Step: Light Green Background -->
                                                         <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                            <Setter Property="Background" Value="#4CAF50" />
+                                                            <Setter Property="Background" Value="#C8E6C9" />
                                                         </DataTrigger>
+
+                                                        <!-- 2. NG Step: Light Pink Background -->
+                                                        <DataTrigger Binding="{Binding IsNg}" Value="True">
+                                                            <Setter Property="Background" Value="#FFCDD2" />
+                                                            <Setter Property="BorderBrush" Value="#C62828" />
+                                                            <Setter Property="BorderThickness" Value="1" />
+                                                        </DataTrigger>
+
+                                                        <!-- 3. Current Step: Blue Background (Highest Priority) -->
                                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                             <Setter Property="Background" Value="{StaticResource BrandBrush}" />
+                                                            <Setter Property="BorderThickness" Value="0" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -253,8 +290,25 @@
                                                 VerticalAlignment="Center"
                                                 FontSize="11"
                                                 FontWeight="Bold"
-                                                Foreground="White"
-                                                Text="{Binding StepNumber}" />
+                                                Text="{Binding StepNumber}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="White" />
+                                                        <Style.Triggers>
+                                                            <!-- Status Colors -->
+                                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                <Setter Property="Foreground" Value="#2E7D32" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsNg}" Value="True">
+                                                                <Setter Property="Foreground" Value="#C62828" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                <Setter Property="Foreground" Value="White" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -269,24 +323,9 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <!--  Footer Navigation  -->
-                    <Grid Grid.Row="3" Margin="0,10,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="8" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button
-                            Grid.Column="0"
-                            Command="{Binding PreviousStepCommand}"
-                            Content="◄ Bước trước"
-                            Style="{StaticResource BtnGhost}" />
-                        <Button
-                            Grid.Column="2"
-                            Command="{Binding NextStepCommand}"
-                            Content="Bước sau ►"
-                            Style="{StaticResource BtnPrimary}" />
-                    </Grid>
+                    <!--  Footer Navigation (Removed Previous/Next buttons)  -->
+                    <Grid Grid.Row="3" Margin="0,10,0,0" />
+
                 </Grid>
             </Border>
 
@@ -301,10 +340,10 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <!--  Step Header  -->
-                        <RowDefinition Height="2*" />
-                        <!--  Image Area  -->
-                        <RowDefinition Height="2*" />
-                        <!--  Detail Info  -->
+                        <RowDefinition Height="5*" />
+                        <!--  Image Area (Priority)  -->
+                        <RowDefinition Height="Auto" MaxHeight="250" />
+                        <!--  Detail Info (Compact)  -->
                     </Grid.RowDefinitions>
 
                     <!--  Step Header  -->
@@ -329,16 +368,16 @@
                                 Foreground="{StaticResource TextMutedBrush}"
                                 Text=" — " />
                             <Run
-                                FontSize="14"
+                                FontSize="15"
                                 Foreground="{StaticResource TextSecondaryBrush}"
                                 Text="{Binding CurrentStep.Description}" />
                         </TextBlock>
-                        <CheckBox
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Content="✓ Hoàn thành"
-                            FontSize="13"
-                            IsChecked="{Binding CurrentStep.IsCompleted}" />
+                        <!--<CheckBox
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Content="✓ Hoàn thành"
+                        FontSize="13"
+                        IsChecked="{Binding CurrentStep.IsCompleted}" />-->
                     </Grid>
 
                     <Rectangle
@@ -349,17 +388,18 @@
                         VerticalAlignment="Bottom"
                         Fill="{StaticResource BorderBrush}" />
 
-                    <!--  ROW 1: Ảnh minh họa  -->
-                    <Grid Grid.Row="1" Margin="16,10,16,0">
+                    <Grid Grid.Row="1" Margin="16,10,16,10">
                         <!--  Actual Image  -->
                         <Border
                             Background="#F5F5F5"
                             ClipToBounds="True"
                             CornerRadius="6"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
                             Visibility="{Binding CurrentStep.HasImages, Converter={StaticResource LocalBoolToVisibility}}">
                             <Image
                                 RenderOptions.BitmapScalingMode="HighQuality"
-                                Source="{Binding CurrentStep.Images}"
+                                Source="{Binding CurrentStep.Images, TargetNullValue={x:Null}}"
                                 Stretch="Uniform" />
                         </Border>
 
@@ -388,99 +428,108 @@
                     <Border
                         Grid.Row="2"
                         Margin="0,8,0,0"
-                        BorderBrush="{StaticResource BorderBrush}"
+                        Padding="16,12,16,12"
+                        BorderBrush="{StaticResource BorderBrush}" 
                         BorderThickness="0,1,0,0">
-                        <ScrollViewer Padding="16,12,16,12" VerticalScrollBarVisibility="Auto">
-                            <StackPanel>
-                                <!--  Mô tả  -->
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontSize="12"
-                                    FontWeight="SemiBold"
-                                    Foreground="{StaticResource TextMutedBrush}"
-                                    Text="📝 MÔ TẢ CÔNG ĐOẠN" />
-                                <TextBlock
-                                    Margin="0,0,0,14"
-                                    FontSize="14"
-                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                    Text="{Binding CurrentStep.Description}"
-                                    TextWrapping="Wrap" />
+                            <Grid Visibility="{Binding CurrentStep.RequiresConfirmation, Converter={StaticResource LocalBoolToVisibility}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
 
-                                <!--  Chú ý  -->
-                                <StackPanel Visibility="{Binding CurrentStep.HasNote, Converter={StaticResource LocalBoolToVisibility}}">
-                                    <TextBlock
-                                        Margin="0,0,0,4"
-                                        FontSize="12"
-                                        FontWeight="SemiBold"
-                                        Foreground="#E65100"
-                                        Text="※ CHÚ Ý" />
-                                    <Border
-                                        Margin="0,0,0,14"
-                                        Padding="10,8"
-                                        Background="#FFF3E0"
-                                        CornerRadius="4">
-                                        <TextBlock
-                                            FontSize="13"
-                                            Foreground="#BF360C"
-                                            Text="{Binding CurrentStep.Note}"
-                                            TextWrapping="Wrap" />
+                                <!-- Left: Info -->
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <!-- Manufa PO Comments -->
+                                    <Border 
+                                        Margin="0,0,0,8"
+                                        Padding="12,8"
+                                        Background="#E8F5E9"
+                                        BorderBrush="#A5D6A7"
+                                        BorderThickness="0,0,0,3"
+                                        CornerRadius="6"
+                                        Visibility="{Binding ManufaComments, Converter={StaticResource NullOrEmptyToVisibility}}">
+                                        <StackPanel>
+                                            <TextBlock
+                                                Margin="0,0,0,4"
+                                                FontSize="11"
+                                                FontWeight="Bold"
+                                                Foreground="#2E7D32"
+                                                Text="📋 GHI CHÚ TỪ MANUFA (PO)" />
+                                            <TextBlock
+                                                FontSize="13"
+                                                Foreground="#1B5E20"
+                                                LineHeight="18"
+                                                Text="{Binding ManufaComments}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Technical Details -->
+                                    <Border 
+                                        Padding="12,8"
+                                        Background="#FAFAFA"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4" Visibility="{Binding CurrentStep.HasNote, Converter={StaticResource LocalBoolToVisibility}}">
+                                                <TextBlock Text="※ CHÚ Ý: " FontWeight="Bold" Foreground="#E65100" FontSize="12" />
+                                                <TextBlock Text="{Binding CurrentStep.Note}" FontSize="12" Foreground="#BF360C" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <WrapPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,16,0" Visibility="{Binding CurrentStep.HasBolts, Converter={StaticResource LocalBoolToVisibility}}">
+                                                    <TextBlock Text="🔩 ỐC VÍT: " FontWeight="Bold" Foreground="#1976D2" FontSize="12" />
+                                                    <TextBlock Text="{Binding CurrentStep.Bolts}" FontSize="12" FontWeight="SemiBold" Foreground="#0D47A1" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Visibility="{Binding CurrentStep.HasForce, Converter={StaticResource LocalBoolToVisibility}}">
+                                                    <TextBlock Text="⚡ LỰC SIẾT: " FontWeight="Bold" Foreground="#F57C00" FontSize="12" />
+                                                    <TextBlock Text="{Binding CurrentStep.Force}" FontSize="12" FontWeight="SemiBold" Foreground="#E65100" />
+                                                </StackPanel>
+                                            </WrapPanel>
+                                        </StackPanel>
                                     </Border>
                                 </StackPanel>
 
-                                <!--  Thông số kỹ thuật  -->
-                                <Grid Margin="0,0,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="8" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <!--  Ốc vít  -->
-                                    <Border
-                                        Grid.Column="0"
-                                        Padding="12,10"
-                                        Background="#E3F2FD"
-                                        CornerRadius="6"
-                                        Visibility="{Binding CurrentStep.HasBolts, Converter={StaticResource LocalBoolToVisibility}}">
-                                        <StackPanel>
-                                            <TextBlock
-                                                FontSize="11"
-                                                FontWeight="SemiBold"
-                                                Foreground="#1976D2"
-                                                Text="🔩 ỐC VÍT" />
-                                            <TextBlock
-                                                Margin="0,4,0,0"
-                                                FontSize="16"
-                                                FontWeight="Bold"
-                                                Foreground="#0D47A1"
-                                                Text="{Binding CurrentStep.Bolts}" />
+                                <!-- Right: Actions -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                 
+                                    <Button Height="46"
+                                            Background="#F44336"
+                                            Foreground="White"
+                                            BorderBrush="#B71C1C"
+                                            BorderThickness="0,0,0,4"
+                                            Cursor="Hand"
+                                              Margin="0,0,0,8"
+                                            Command="{Binding ConfirmNgCommand}"
+                                            hc:BorderElement.CornerRadius="8">
+                                        <Button.Effect>
+                                            <DropShadowEffect BlurRadius="8" Direction="270" Opacity="0.2" ShadowDepth="2" />
+                                        </Button.Effect>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontSize="20" Text="✖ " VerticalAlignment="Center" FontWeight="Black" />
+                                            <TextBlock FontSize="16" FontWeight="Black" Text="NG" VerticalAlignment="Center" />
                                         </StackPanel>
-                                    </Border>
-
-                                    <!--  Lực siết  -->
-                                    <Border
-                                        Grid.Column="2"
-                                        Padding="12,10"
-                                        Background="#FFF3E0"
-                                        CornerRadius="6"
-                                        Visibility="{Binding CurrentStep.HasForce, Converter={StaticResource LocalBoolToVisibility}}">
-                                        <StackPanel>
-                                            <TextBlock
-                                                FontSize="11"
-                                                FontWeight="SemiBold"
-                                                Foreground="#F57C00"
-                                                Text="⚡ LỰC SIẾT" />
-                                            <TextBlock
-                                                Margin="0,4,0,0"
-                                                FontSize="16"
-                                                FontWeight="Bold"
-                                                Foreground="#E65100"
-                                                Text="{Binding CurrentStep.Force}" />
+                                    </Button>
+                                       <Button Height="46"
+                                            Background="#4CAF50"
+                                            Foreground="White"
+                                            BorderBrush="#1B5E20"
+                                            BorderThickness="0,0,0,4"
+                                            Cursor="Hand"
+                                            Command="{Binding ConfirmOkCommand}"
+                                            hc:BorderElement.CornerRadius="8">
+                                        <Button.Effect>
+                                            <DropShadowEffect BlurRadius="8" Direction="270" Opacity="0.2" ShadowDepth="2" />
+                                        </Button.Effect>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontSize="20" Text="✔ " VerticalAlignment="Center" FontWeight="Black" />
+                                            <TextBlock FontSize="16" FontWeight="Black" Text="OK" VerticalAlignment="Center" />
                                         </StackPanel>
-                                    </Border>
-                                </Grid>
-                            </StackPanel>
-                        </ScrollViewer>
+                                    </Button>
+
+                                </StackPanel>
+                            </Grid>
                     </Border>
                 </Grid>
             </Border>

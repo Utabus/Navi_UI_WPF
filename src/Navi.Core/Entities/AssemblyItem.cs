@@ -47,6 +47,30 @@ namespace Navi.Core.Entities
         public string Type { get; set; }
         
         /// <summary>
+        /// Thứ tự thực hiện
+        /// Execution order
+        /// </summary>
+        public int? Step { get; set; }
+
+        /// <summary>
+        /// Lượng mỡ bôi trơn
+        /// Grease amount
+        /// </summary>
+        public int? Grease { get; set; }
+
+        /// <summary>
+        /// Bit lực (loại đầu vặn lực)
+        /// Force bit type
+        /// </summary>
+        public int? ForceBit { get; set; }
+
+        /// <summary>
+        /// Thời gian thực hiện (giây)
+        /// Timer (seconds)
+        /// </summary>
+        public int? Timer { get; set; }
+        
+        /// <summary>
         /// Ngày tạo (Created Date Time)
         /// </summary>
         public DateTime Cdt { get; set; }

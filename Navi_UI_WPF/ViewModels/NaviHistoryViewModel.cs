@@ -1,9 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Navi.Application.DTOs;
+using Navi.Application.Interfaces;
+using Navi.Application.Services;
+using Navi.Core.Interfaces;
+using Navi.Infrastructure.Repositories;
 
 namespace Navi_UI_WPF.ViewModels
 {
@@ -12,22 +19,28 @@ namespace Navi_UI_WPF.ViewModels
     /// </summary>
     public class NaviHistoryViewModel : ObservableObject
     {
-        public NaviHistoryViewModel()
+        private readonly INaviHistoryService _service;
+
+        public NaviHistoryViewModel(INaviHistoryService service)
         {
+            _service = service;
+
             HistoryRecords = new ObservableCollection<NaviHistoryDto>();
             AvailableTypes = new ObservableCollection<string> { "SCAN", "CHECK", "CONFIRM", "REWORK", "REJECT" };
-            LoadSampleData();
+            
+            // Initial load
+            LoadAll();
 
-            LoadAllCommand         = new RelayCommand(() => LoadAll());
-            FilterByCodeNVCommand  = new RelayCommand(() => ExecuteFilterByCodeNV());
-            FilterByPOCommand      = new RelayCommand(() => ExecuteFilterByPO());
-            FilterByProductItemCommand = new RelayCommand(() => ExecuteFilterByProductItem());
+            LoadAllCommand         = new AsyncRelayCommand(async () => await LoadAllAsync());
+            FilterByCodeNVCommand  = new AsyncRelayCommand(async () => await ExecuteFilterByCodeNVAsync());
+            FilterByPOCommand      = new AsyncRelayCommand(async () => await ExecuteFilterByPOAsync());
+            FilterByProductItemCommand = new AsyncRelayCommand(async () => await ExecuteFilterByProductItemAsync());
             ClearFilterCommand     = new RelayCommand(() => ClearFilters());
             AddCommand             = new RelayCommand(() => OpenAddDialog());
             EditCommand            = new RelayCommand<NaviHistoryDto>(item => OpenEditDialog(item), _ => SelectedRecord != null);
-            DeleteCommand          = new RelayCommand<NaviHistoryDto>(item => ExecuteDelete(item), _ => SelectedRecord != null);
+            DeleteCommand          = new AsyncRelayCommand<NaviHistoryDto>(async item => await ExecuteDeleteAsync(item), _ => SelectedRecord != null);
             SelectRecordCommand    = new RelayCommand<NaviHistoryDto>(item => SelectRecord(item));
-            SaveCommand            = new RelayCommand(() => ExecuteSave());
+            SaveCommand            = new AsyncRelayCommand(async () => await ExecuteSaveAsync());
             CancelEditCommand      = new RelayCommand(() => { IsDetailVisible = false; SelectedRecord = null; });
         }
 
@@ -146,8 +159,8 @@ namespace Navi_UI_WPF.ViewModels
             set => SetProperty(ref _editPO, value);
         }
 
-        private string _editStep;
-        public string EditStep
+        private int _editStep;
+        public int EditStep
         {
             get => _editStep;
             set => SetProperty(ref _editStep, value);
@@ -192,30 +205,84 @@ namespace Navi_UI_WPF.ViewModels
 
         private void LoadAll()
         {
-            FilterCodeNV = ""; FilterPO = ""; FilterProductItemId = "";
-            UpdateSummary();
-            StatusMessage = $"Tải thành công {HistoryRecords.Count} bản ghi";
+            _ = LoadAllAsync();
         }
 
-        private void ExecuteFilterByCodeNV()
+        private async Task LoadAllAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                FilterCodeNV = ""; FilterPO = ""; FilterProductItemId = "";
+                
+                var data = await _service.GetAllAsync();
+                HistoryRecords.Clear();
+                foreach (var item in data.OrderByDescending(x => x.Cdt))
+                    HistoryRecords.Add(item);
+
+                UpdateSummary();
+                StatusMessage = $"Tải thành công {HistoryRecords.Count} bản ghi";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Lỗi: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task ExecuteFilterByCodeNVAsync()
         {
             if (string.IsNullOrWhiteSpace(FilterCodeNV)) return;
-            StatusMessage = $"Lọc theo mã NV: {FilterCodeNV}";
-            // TODO: gọi INaviHistoryService.GetByCodeNVAsync(FilterCodeNV)
+            try
+            {
+                IsLoading = true;
+                StatusMessage = $"Lọc theo mã NV: {FilterCodeNV}";
+                var data = await _service.GetByCodeNVAsync(FilterCodeNV);
+                HistoryRecords.Clear();
+                foreach (var item in data) HistoryRecords.Add(item);
+                UpdateSummary();
+            }
+            catch (Exception ex) { StatusMessage = $"Lỗi: {ex.Message}"; }
+            finally { IsLoading = false; }
         }
 
-        private void ExecuteFilterByPO()
+        private async Task ExecuteFilterByPOAsync()
         {
             if (string.IsNullOrWhiteSpace(FilterPO)) return;
-            StatusMessage = $"Lọc theo PO: {FilterPO}";
-            // TODO: gọi INaviHistoryService.GetByPOAsync(FilterPO)
+            try
+            {
+                IsLoading = true;
+                StatusMessage = $"Lọc theo PO: {FilterPO}";
+                var data = await _service.GetByPOAsync(FilterPO);
+                HistoryRecords.Clear();
+                foreach (var item in data) HistoryRecords.Add(item);
+                UpdateSummary();
+            }
+            catch (Exception ex) { StatusMessage = $"Lỗi: {ex.Message}"; }
+            finally { IsLoading = false; }
         }
 
-        private void ExecuteFilterByProductItem()
+        private async Task ExecuteFilterByProductItemAsync()
         {
-            if (string.IsNullOrWhiteSpace(FilterProductItemId)) return;
-            StatusMessage = $"Lọc theo ProductItem: {FilterProductItemId}";
-            // TODO: gọi INaviHistoryService.GetByProductItemAsync
+            if (!int.TryParse(FilterProductItemId, out int id))
+            {
+                StatusMessage = "ID ProductItem không hợp lệ";
+                return;
+            }
+            try
+            {
+                IsLoading = true;
+                StatusMessage = $"Lọc theo Item: {id}";
+                var data = await _service.GetByItemIdAsync(id);
+                HistoryRecords.Clear();
+                foreach (var item in data) HistoryRecords.Add(item);
+                UpdateSummary();
+            }
+            catch (Exception ex) { StatusMessage = $"Lỗi: {ex.Message}"; }
+            finally { IsLoading = false; }
         }
 
         private void ClearFilters()
@@ -227,7 +294,7 @@ namespace Navi_UI_WPF.ViewModels
         private void OpenAddDialog()
         {
             IsEditMode = false;
-            EditNameNV = ""; EditCodeNV = ""; EditPO = ""; EditStep = ""; EditType = "SCAN"; EditCount = 1;
+            EditNameNV = ""; EditCodeNV = ""; EditPO = ""; EditStep = 0; EditType = "SCAN"; EditCount = 1;
             IsDetailVisible = true;
             SelectedRecord = null;
             StatusMessage = "Ghi log thao tác mới";
@@ -240,49 +307,71 @@ namespace Navi_UI_WPF.ViewModels
             EditNameNV = record.NameNV;
             EditCodeNV = record.CodeNV;
             EditPO = record.PO;
-            EditStep = record.Step;
+            EditStep = record.Step ?? 0;
             EditType = record.Type;
             EditCount = record.Count;
             IsDetailVisible = true;
             StatusMessage = $"Chỉnh sửa: #{record.Id}";
         }
 
-        private void ExecuteSave()
+        private async Task ExecuteSaveAsync()
         {
-            if (IsEditMode && SelectedRecord != null)
+            try
             {
-                SelectedRecord.NameNV = EditNameNV;
-                SelectedRecord.CodeNV = EditCodeNV;
-                SelectedRecord.PO = EditPO;
-                SelectedRecord.Step = EditStep;
-                SelectedRecord.Type = EditType;
-                SelectedRecord.Count = EditCount;
-                StatusMessage = $"Đã cập nhật record #{SelectedRecord.Id}";
-            }
-            else
-            {
-                var newRecord = new NaviHistoryDto
+                IsLoading = true;
+                if (IsEditMode && SelectedRecord != null)
                 {
-                    Id = HistoryRecords.Count + 1,
-                    NameNV = EditNameNV, CodeNV = EditCodeNV,
-                    PO = EditPO, Step = EditStep, Type = EditType, Count = EditCount,
-                    Cdt = DateTime.Now, Udt = DateTime.Now
-                };
-                HistoryRecords.Insert(0, newRecord);
-                StatusMessage = $"Đã thêm record mới #{newRecord.Id}";
+                    var updateDto = new UpdateNaviHistoryDto
+                    {
+                        NameNV = EditNameNV, CodeNV = EditCodeNV, PO = EditPO,
+                        Step = EditStep, Type = EditType, Count = EditCount,
+                        ItemId = SelectedRecord.ItemId
+                    };
+                    var updated = await _service.UpdateAsync(SelectedRecord.Id, updateDto);
+                    
+                    // Update local collection
+                    var index = HistoryRecords.IndexOf(SelectedRecord);
+                    if (index != -1) HistoryRecords[index] = updated;
+                    
+                    StatusMessage = $"Đã cập nhật record #{updated.Id}";
+                }
+                else
+                {
+                    var createDto = new CreateNaviHistoryDto
+                    {
+                        NameNV = EditNameNV, CodeNV = EditCodeNV, PO = EditPO,
+                        Step = EditStep, Type = EditType, Count = EditCount,
+                        ItemId = 0
+                    };
+                    var created = await _service.CreateAsync(createDto);
+                    HistoryRecords.Insert(0, created);
+                    StatusMessage = $"Đã thêm record mới #{created.Id}";
+                }
+                IsDetailVisible = false;
+                UpdateSummary();
             }
-            IsDetailVisible = false;
-            UpdateSummary();
+            catch (Exception ex) { StatusMessage = $"Lỗi lưu: {ex.Message}"; }
+            finally { IsLoading = false; }
         }
 
-        private void ExecuteDelete(NaviHistoryDto record)
+        private async Task ExecuteDeleteAsync(NaviHistoryDto record)
         {
             if (record == null) return;
-            HistoryRecords.Remove(record);
-            SelectedRecord = null;
-            IsDetailVisible = false;
-            StatusMessage = $"Đã xóa record #{record.Id}";
-            UpdateSummary();
+            try
+            {
+                IsLoading = true;
+                bool deleted = await _service.DeleteAsync(record.Id);
+                if (deleted)
+                {
+                    HistoryRecords.Remove(record);
+                    SelectedRecord = null;
+                    IsDetailVisible = false;
+                    StatusMessage = $"Đã xóa record #{record.Id}";
+                    UpdateSummary();
+                }
+            }
+            catch (Exception ex) { StatusMessage = $"Lỗi xóa: {ex.Message}"; }
+            finally { IsLoading = false; }
         }
 
         private void SelectRecord(NaviHistoryDto record)
@@ -291,7 +380,7 @@ namespace Navi_UI_WPF.ViewModels
             SelectedRecord = record;
             IsDetailVisible = true;
             EditNameNV = record.NameNV; EditCodeNV = record.CodeNV;
-            EditPO = record.PO; EditStep = record.Step;
+            EditPO = record.PO; EditStep = record.Step ?? 0;
             EditType = record.Type; EditCount = record.Count;
             IsEditMode = false;
             StatusMessage = $"Xem chi tiết: #{record.Id} — {record.NameNV}";
@@ -309,11 +398,11 @@ namespace Navi_UI_WPF.ViewModels
 
         private void LoadSampleData()
         {
-            HistoryRecords.Add(new NaviHistoryDto { Id = 1, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-001", Step = "3", Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddHours(-2), Udt = DateTime.Now.AddHours(-2) });
-            HistoryRecords.Add(new NaviHistoryDto { Id = 2, NameNV = "Trần Thị B", CodeNV = "NV002", PO = "PO-2025-001", Step = "1", Type = "CHECK", Count = 2, Cdt = DateTime.Now.AddHours(-1), Udt = DateTime.Now.AddHours(-1) });
-            HistoryRecords.Add(new NaviHistoryDto { Id = 3, NameNV = "Lê Văn C", CodeNV = "NV003", PO = "PO-2025-002", Step = "2", Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddMinutes(-30), Udt = DateTime.Now.AddMinutes(-30) });
-            HistoryRecords.Add(new NaviHistoryDto { Id = 4, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-002", Step = "4", Type = "CONFIRM", Count = 1, Cdt = DateTime.Now.AddMinutes(-10), Udt = DateTime.Now.AddMinutes(-10) });
-            HistoryRecords.Add(new NaviHistoryDto { Id = 5, NameNV = "Phạm Thị D", CodeNV = "NV004", PO = "PO-2025-003", Step = "1", Type = "SCAN", Count = 3, Cdt = DateTime.Now.AddMinutes(-5), Udt = DateTime.Now.AddMinutes(-5) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 1, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-001", Step = 3, Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddHours(-2), Udt = DateTime.Now.AddHours(-2) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 2, NameNV = "Trần Thị B", CodeNV = "NV002", PO = "PO-2025-001", Step = 1, Type = "CHECK", Count = 2, Cdt = DateTime.Now.AddHours(-1), Udt = DateTime.Now.AddHours(-1) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 3, NameNV = "Lê Văn C", CodeNV = "NV003", PO = "PO-2025-002", Step = 2, Type = "SCAN", Count = 1, Cdt = DateTime.Now.AddMinutes(-30), Udt = DateTime.Now.AddMinutes(-30) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 4, NameNV = "Nguyễn Văn A", CodeNV = "NV001", PO = "PO-2025-002", Step = 4, Type = "CONFIRM", Count = 1, Cdt = DateTime.Now.AddMinutes(-10), Udt = DateTime.Now.AddMinutes(-10) });
+            HistoryRecords.Add(new NaviHistoryDto { Id = 5, NameNV = "Phạm Thị D", CodeNV = "NV004", PO = "PO-2025-003", Step = 1, Type = "SCAN", Count = 3, Cdt = DateTime.Now.AddMinutes(-5), Udt = DateTime.Now.AddMinutes(-5) });
             UpdateSummary();
             StatusMessage = $"Tải thành công {HistoryRecords.Count} bản ghi";
         }

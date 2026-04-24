@@ -1,4 +1,5 @@
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using Navi_UI_WPF.ViewModels;
 
 namespace Navi_UI_WPF.Views
@@ -11,11 +12,13 @@ namespace Navi_UI_WPF.Views
     public partial class LoginView : Window
     {
         private LoginViewModel _vm;
+        private readonly System.IServiceProvider _serviceProvider;
 
-        public LoginView()
+        public LoginView(LoginViewModel vm, System.IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _vm = new LoginViewModel();
+            _vm = vm;
+            _serviceProvider = serviceProvider;
             _vm.LoginSucceeded += OnLoginSucceeded;
             DataContext = _vm;
 
@@ -31,8 +34,8 @@ namespace Navi_UI_WPF.Views
      
         private void OnLoginSucceeded()
         {
-            // Đóng Login, mở Main window
-            var mainWindow = new MainWindow();
+            // Đóng Login, mở Main window từ DI
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
             this.Close();

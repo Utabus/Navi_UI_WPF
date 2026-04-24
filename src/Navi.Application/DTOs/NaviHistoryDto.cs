@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Navi.Application.DTOs
 {
@@ -15,10 +16,17 @@ namespace Navi.Application.DTOs
         public string NameNV { get; set; }
         public string CodeNV { get; set; }
         public string PO { get; set; }
-        public string Step { get; set; }
-        public int? ProductItemId { get; set; }
+        public string Device { get; set; }
+        public string ProductName { get; set; }
+        public int? Step { get; set; }
+        public int? ItemId { get; set; }
+        public int? ItemAuditId { get; set; }
+        public int? ProductId { get; set; }
         public string Type { get; set; }
         public int? Count { get; set; }
+        public bool? OK { get; set; }
+        public bool? NG { get; set; }
+        public string Note { get; set; }
         public DateTime Cdt { get; set; }
         public DateTime Udt { get; set; }
         public bool IsDelete { get; set; }
@@ -36,23 +44,23 @@ namespace Navi.Application.DTOs
         public string NameNV { get; set; }
         public string CodeNV { get; set; }
         public string PO { get; set; }
-        public string Step { get; set; }
-        public int? ProductItemId { get; set; }
+        public string Device { get; set; }
+        public string ProductName { get; set; }
+        public int? Step { get; set; }
+        public int? ItemId { get; set; }
+        public int? ItemAuditId { get; set; }
+        public int? ProductId { get; set; }
         public string Type { get; set; }
         public int? Count { get; set; }
+        public bool? OK { get; set; }
+        public bool? NG { get; set; }
+        public string Note { get; set; }
     }
 
     /// <summary>
     /// DTO cập nhật log thao tác
     /// </summary>
-    public class UpdateNaviHistoryDto
+    public class UpdateNaviHistoryDto : CreateNaviHistoryDto
     {
-        public string NameNV { get; set; }
-        public string CodeNV { get; set; }
-        public string PO { get; set; }
-        public string Step { get; set; }
-        public int? ProductItemId { get; set; }
-        public string Type { get; set; }
-        public int? Count { get; set; }
     }
 }

@@ -19,12 +19,13 @@
 
 ```
 d:\Khang\Navi_UI_WPF\
-├── Navi_UI_WPF\          → WPF App (main project)
-├── Navi.Infrastructure\  → Repository implementations, ProductAssemblyService
-├── Navi.Shared\          → DTOs dùng chung
-├── USB_IO_Lib\           → Thư viện USB I/O (ngoài)
-├── src\                  → Source files khác
-├── docs\plans\           → Tài liệu kế hoạch
+├── Navi_UI_WPF\          → WPF App (main project - ViewModels/Views)
+├── Navi.Infrastructure\  → Repositories (HTTP Clients), Hardware Integration
+├── Navi.Shared\          → DTOs dùng chung (legacy - migrating to Navi.Application)
+├── src\
+│   ├── Navi.Core\        → Domain entities, interfaces, constants, enums
+│   └── Navi.Application\ → DTOs, Service Interfaces, Business Logic
+├── .rules\               → Architecture and coding rules (MANDATORY)
 ├── API.md                → Tài liệu REST API đầy đủ
 └── CONTEXT.md            → File này
 ```
@@ -58,6 +59,7 @@ Navi_UI_WPF/
 | `Serilog` + `Sinks.File` | 2.10 / 5.0 | Logging |
 | `SkiaSharp` | 3.119.2 | 2D graphics |
 | `System.Memory`, `System.Buffers` | 4.x | Performance helpers |
+| `Microsoft.Extensions.DependencyInjection` | 8.0.0 | DI Container / IoC |
 
 > **Quan trọng:** .NET 4.7.2 → **không dùng Source Generator** của CommunityToolkit. Dùng `[ObservableProperty]` attribute sẽ không hoạt động. Phải viết property thủ công với `SetProperty(ref ...)`.
 
@@ -121,7 +123,8 @@ Mỗi khi navigate → tạo mới ViewModel instance → **data bị reset**.
   - `SearchText` — nếu là số → nhảy đến step đó; nếu là text → filter
   - `ProgressPercentage`, `TotalSteps`, `CompletedStepsCount`
   - `PoNumber`, `ProductId`, `ProductName`, `IsLoading`, `ErrorMessage`
-- **Commands:** `NextStepCommand`, `PreviousStepCommand`, `JumpToStepCommand`, `LoadDataCommand`, `ToggleStepCompletionCommand`
+- **Commands:** `ConfirmOkCommand`, `ConfirmNgCommand`, `JumpToStepCommand`, `LoadDataCommand`, `ToggleStepCompletionCommand`
+- **Navigation:** Sử dụng nút OK/NG để tự động chuyển bước. Các bước chưa tới sẽ bị khóa (`IsLocked`).
 - **Fallback:** Nếu API lỗi → load `LoadSampleData()` (6 bước mẫu lắp Rail đường sắt)
 - **API call:** `GET /api/naviproducts/{id}/items`
 
@@ -146,6 +149,11 @@ Mỗi khi navigate → tạo mới ViewModel instance → **data bị reset**.
 - **Block 1/2 fields:** `Block1SizeBall`, `Block1LucMin`, `Block1LucMax`, `Block2SizeBall`, `Block2LucMin`, `Block2LucMax`
 - **Result fields:** `Result1`, `Result2`
 - **Commands:** `ConnectCommand` (toggle open/close), `SaveCommand` (TODO)
+
+### `SettingsViewModel`
+- **File:** `ViewModels/SettingsViewModel.cs`
+- **Chức năng:** Quản lý cấu hình hệ thống (theme, auto-save, interval).
+- **Service:** `ISettingsService`.
 
 ### `NaviProductViewModel`
 - **File:** `ViewModels/NaviProductViewModel.cs`
@@ -189,6 +197,15 @@ Mỗi khi navigate → tạo mới ViewModel instance → **data bị reset**.
 ---
 
 ## 7. Infrastructure Layer
+
+### `Navi.Application`
+- **DTOs:** Chứa các data models cho API communication.
+- **Interfaces:** Định nghĩa service contracts.
+- **Services:** Logic gọi API via `HttpClient` (pattern `SendAsync<T>`).
+
+### `Navi.Core`
+- **Entities:** Domain entities (Mirror backend database names).
+- **Common/Constants:** Exception types, API Endpoints, Enums.
 
 ### `Navi.Infrastructure`
 - `ProductAssemblyRepository` — Repository gọi API lấy dữ liệu lắp ráp
@@ -255,9 +272,16 @@ POST /api/naviproducts/import-excel  → Import hàng loạt từ Excel
 ## 10. TODO / Chưa implement
 
 - [ ] `ForceGaugeViewModel.Save()` — logic lưu kết quả đo
-- [ ] `NaviProductViewModel` — thực sự gọi API (đang dùng sample data)
-- [ ] `NaviItemViewModel` — thực sự gọi API
-- [ ] `NaviProductItemViewModel` — thực sự gọi API
-- [ ] `NaviHistoryViewModel` — `FilterByCodeNVCommand`, `FilterByPOCommand`, `FilterByProductItemCommand` chưa gọi API thật
+- [ ] Thực sự tích hợp `SettingsViewModel` vào UI (Menu/View)
+- [ ] Chuyển đổi nốt các ViewModel cũ sang dùng DI hoàn toàn (constructor injection)
 - [ ] `ForceGaugeViewModel` — COM port hiện hardcode `"COM3"`, cần cho phép user chọn
-- [ ] DI/IoC container chưa có (đang `new` trực tiếp trong constructor)
+
+---
+
+## 11. Coding Rules ([.rules/](./.rules/))
+
+Dự án áp dụng bộ quy tắc nghiêm ngặt:
+1. **00-Senior-Architect-Manifesto**: Quy tắc kiến trúc tổng thể.
+2. **02-MVVM-Pattern**: Cấm Source Generator, bắt buộc manual boilerplate.
+3. **04-Build-Testing**: Bắt buộc cập nhật `.csproj` thủ công khi thêm file mới.
+4. **05-Data-Access**: Pattern Error handling và API communication.

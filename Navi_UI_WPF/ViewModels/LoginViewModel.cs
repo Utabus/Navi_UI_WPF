@@ -8,13 +8,14 @@ namespace Navi_UI_WPF.ViewModels
 {
     public class LoginViewModel : ObservableObject
     {
-        private readonly AuthService _authService = new AuthService();
+        private readonly IAuthService _authService;
 
         // ─── Event để App.xaml.cs biết khi login thành công ─────────────────
         public event Action LoginSucceeded;
 
-        public LoginViewModel()
+        public LoginViewModel(IAuthService authService)
         {
+            _authService = authService;
             LoginCommand = new RelayCommand(async () => await ExecuteLoginAsync(), CanLogin);
         }
 

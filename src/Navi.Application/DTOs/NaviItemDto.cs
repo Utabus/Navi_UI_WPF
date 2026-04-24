@@ -20,6 +20,9 @@ namespace Navi.Application.DTOs
         public string Images { get; set; }
         public string Type { get; set; }
         public int? Step { get; set; }
+        public int? Grease { get; set; }
+        public int? ForceBit { get; set; }
+        public int? Timer { get; set; }
         public DateTime Cdt { get; set; }
         public DateTime Udt { get; set; }
         public bool IsDelete { get; set; }
@@ -54,6 +57,9 @@ namespace Navi.Application.DTOs
         public string Images { get; set; }
         public string Type { get; set; }
         public int? Step { get; set; }
+        public int? Grease { get; set; }
+        public int? ForceBit { get; set; }
+        public int? Timer { get; set; }
     }
 
     /// <summary>
@@ -68,5 +74,8 @@ namespace Navi.Application.DTOs
         public string Images { get; set; }
         public string Type { get; set; }
         public int? Step { get; set; }
+        public int? Grease { get; set; }
+        public int? ForceBit { get; set; }
+        public int? Timer { get; set; }
     }
 }

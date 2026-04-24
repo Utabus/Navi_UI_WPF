@@ -1,258 +1,117 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Navi.Application.DTOs;
+using Navi.Application.Interfaces;
 using Navi.Application.Services;
-using Navi.Infrastructure.Repositories;
+using Navi_UI_WPF.Services;
+using Navi_UI_WPF.Views;
+using Serilog;
+using HandyControl.Controls;
+using HandyControl.Data;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Navi_UI_WPF.ViewModels
 {
     /// <summary>
-    /// ViewModel chính cho Product Assembly View
-    /// Main ViewModel for Product Assembly View
+    /// ViewModel chính cho Product Assembly View cụ thể
     /// </summary>
-    public class ProductAssemblyViewModel : ObservableObject
+    public class ProductAssemblyViewModel : BaseAssemblyViewModel
     {
         private readonly ProductAssemblyService _service;
+        private readonly ManufaService _manufaService;
         
-        private int _productId;
-        private string _productName;
-        private string _description;
-        private DateTime _createdDate;
-        private DateTime _updatedDate;
-        
-        private ObservableCollection<AssemblyStepViewModel> _steps;
-        private AssemblyStepViewModel _currentStep;
-        private int _currentStepIndex;
-        
-        private bool _isLoading;
-        private string _errorMessage;
-        private bool _hasError;
+        public ICommand SearchPoCommand { get; }
 
-        public ProductAssemblyViewModel()
+        public ProductAssemblyViewModel(
+            ProductAssemblyService service, 
+            ManufaService manufaService,
+            INaviHistoryService historyService,
+            IDeviceService deviceService,
+            INaviItemService naviItemService,
+            IServiceProvider serviceProvider)
+            : base(historyService, deviceService, naviItemService, serviceProvider)
         {
-            // Initialize service (in production, use DI)
-            var repository = new ProductAssemblyRepository();
-            _service = new ProductAssemblyService(repository);
+            _service = service;
+            _manufaService = manufaService;
             
-            Steps = new ObservableCollection<AssemblyStepViewModel>();
-            StepsView = System.Windows.Data.CollectionViewSource.GetDefaultView(Steps);
-            StepsView.Filter = FilterSteps;
-            
-            // Initialize commands
-            NextStepCommand             = new RelayCommand(NextStep, CanGoNext);
-            PreviousStepCommand         = new RelayCommand(PreviousStep, CanGoPrevious);
-            JumpToStepCommand           = new RelayCommand<AssemblyStepViewModel>(JumpToStep);
-            LoadDataCommand             = new RelayCommand<int>(async id => await LoadProductAssemblyAsync(id));
-            ToggleStepCompletionCommand = new RelayCommand(ToggleCurrentStepCompletion);
+            SearchPoCommand = new AsyncRelayCommand(SearchPoAsync);
         }
 
-        #region Properties
+        #region Properties riêng
 
-        private string _searchText;
-        public string SearchText
+        private string _manufaComments;
+        public string ManufaComments
         {
-             get => _searchText;
-             set
-             {
-                 if (SetProperty(ref _searchText, value))
-                 {
-                     // If input is a number, jump to that step and DO NOT filter
-                     if (int.TryParse(_searchText, out int stepNumber))
-                     {
-                         // Jump to step (1-based index to 0-based)
-                         int index = stepNumber - 1;
-                         if (index >= 0 && index < TotalSteps)
-                         {
-                             CurrentStepIndex = index;
-                         }
-                         // Disable filter so user can see context
-                         StepsView.Filter = null; 
-                     }
-                     else
-                     {
-                         // If input is text, apply filter
-                         StepsView.Filter = FilterSteps;
-                     }
-                     StepsView.Refresh();
-                 }
-             }
+            get => _manufaComments;
+            set => SetProperty(ref _manufaComments, value);
         }
 
-        public System.ComponentModel.ICollectionView StepsView { get; private set; }
-        private string _poNumber;
-        public string PoNumber
+        private string _phtx;
+        public string Phtx
         {
-            get => _poNumber;
-            set => SetProperty(ref _poNumber, value);
+            get => _phtx;
+            set => SetProperty(ref _phtx, value);
         }
 
-        public int ProductId
+        private string _phcd;
+        public string Phcd
         {
-            get => _productId;
-            set => SetProperty(ref _productId, value);
+            get => _phcd;
+            set => SetProperty(ref _phcd, value);
         }
-
-        public string ProductName
-        {
-            get => _productName;
-            set => SetProperty(ref _productName, value);
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => SetProperty(ref _description, value);
-        }
-
-        public DateTime CreatedDate
-        {
-            get => _createdDate;
-            set => SetProperty(ref _createdDate, value);
-        }
-
-        public DateTime UpdatedDate
-        {
-            get => _updatedDate;
-            set => SetProperty(ref _updatedDate, value);
-        }
-
-        public ObservableCollection<AssemblyStepViewModel> Steps
-        {
-            get => _steps;
-            set => SetProperty(ref _steps, value);
-        }
-
-        public AssemblyStepViewModel CurrentStep
-        {
-            get => _currentStep;
-            set
-            {
-                if (SetProperty(ref _currentStep, value))
-                {
-                    // Sync Index if needed
-                    if (_currentStep != null)
-                    {
-                        var index = Steps.IndexOf(_currentStep);
-                        if (index != -1 && index != _currentStepIndex)
-                        {
-                            _currentStepIndex = index;
-                            OnPropertyChanged(nameof(CurrentStepIndex));
-                        }
-                        
-                        // Update visual state (IsCurrent)
-                        foreach (var step in Steps) step.IsCurrent = false;
-                        _currentStep.IsCurrent = true;
-                    }
-
-                    OnPropertyChanged(nameof(CurrentStepNumber));
-                    OnPropertyChanged(nameof(HasCurrentStep));
-                    OnPropertyChanged(nameof(ProgressPercentage));
-                }
-
-            }
-        }
-
-        public int CurrentStepIndex
-        {
-            get => _currentStepIndex;
-            set
-            {
-                if (SetProperty(ref _currentStepIndex, value))
-                {
-                    UpdateCurrentStep();
-                    OnPropertyChanged(nameof(CurrentStepNumber));
-                    OnPropertyChanged(nameof(ProgressPercentage));
-                    
-                    NextStepCommand?.NotifyCanExecuteChanged();
-                    PreviousStepCommand?.NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public int CurrentStepNumber => CurrentStepIndex + 1;
-        
-        public int TotalSteps => Steps?.Count ?? 0;
-
-        public double ProgressPercentage
-        {
-            get
-            {
-                if (TotalSteps == 0) return 0;
-                return (double)CurrentStepNumber / TotalSteps * 100;
-            }
-        }
-
-        public int CompletedStepsCount => Steps?.Count(s => s.IsCompleted) ?? 0;
-
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
-        }
-
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                if (SetProperty(ref _errorMessage, value))
-                {
-                    HasError = !string.IsNullOrEmpty(value);
-                }
-            }
-        }
-
-        public bool HasCurrentStep => CurrentStep != null;
-
-        public bool HasError
-        {
-            get => _hasError;
-            set => SetProperty(ref _hasError, value);
-        }
-
 
         #endregion
 
-        #region Commands
+        #region Overrides
 
-        public IRelayCommand NextStepCommand { get; }
-        public IRelayCommand PreviousStepCommand { get; }
-        public ICommand JumpToStepCommand { get; }
-        public ICommand LoadDataCommand { get; }
-        public ICommand ToggleStepCompletionCommand { get; }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Load product assembly data from API
-        /// </summary>
-        public async Task LoadProductAssemblyAsync(int productId)
+        public override async Task LoadProductAssemblyAsync(string productName, string po = null)
         {
+            if (string.IsNullOrEmpty(productName)) return;
+             
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
                 
-                var dto = await _service.GetProductAssemblyByIdAsync(productId);
+                CurrentStep = null;
+                CurrentStepIndex = -1;
                 
-                ProductId = dto.Id;
-                ProductName = dto.ProductName;
-                Description = dto.Description;
-                CreatedDate = dto.Cdt;
-                UpdatedDate = dto.Udt;
-                
-                // Map items to ViewModels
-                Steps.Clear();
-                foreach (var item in dto.Items)
+                List<NaviItemDto> items;
+                if (!string.IsNullOrEmpty(po))
                 {
-                    Steps.Add(new AssemblyStepViewModel
+                    var itemsWithStatus = await _naviItemService.GetWithHistoryStatusAsync(productName, po);
+                    items = itemsWithStatus.Cast<NaviItemDto>().ToList();
+                }
+                else
+                {
+                    items = await _naviItemService.GetByProductMasterNameAsync(productName);
+                }
+                
+                if (items == null || items.Count == 0)
+                {
+                    ErrorMessage = $"Không tìm thấy dữ liệu lắp ráp cho sản phẩm: {productName}";
+                    return;
+                }
+
+                ProductId = 0; 
+                ProductName = productName;
+                Description = $"Danh sách bước lắp ráp cho {productName}";
+                CreatedDate = DateTime.Now;
+                UpdatedDate = DateTime.Now;
+                
+                Steps.Clear();
+                foreach (var item in items)
+                {
+                    var statusDto = item as NaviItemStatusDto;
+                    var step = new AssemblyStepViewModel
                     {
                         Id = item.Id,
                         Description = item.Description,
@@ -261,29 +120,49 @@ namespace Navi_UI_WPF.ViewModels
                         Force = item.Force,
                         Images = item.Images,
                         Type = item.Type,
-                        IsCompleted = false,
+                        IsCompleted = statusDto?.OK ?? false,
+                        IsNg = statusDto?.NG ?? false,
                         IsCurrent = false,
-                        StepNumber = Steps.Count + 1 // Ensure StepNumber is populated
-                    });
+                        StepNumber = item.Step ?? (Steps.Count + 1),
+                        Grease = item.Grease,
+                        ForceBit = item.ForceBit,
+                        Timer = item.Timer,
+                        PO = statusDto?.PO,
+                        HistoryNote = statusDto?.HistoryNote,
+                        Count = statusDto?.Count,
+                        OK = statusDto?.OK,
+                        NG = statusDto?.NG,
+                        ItemAuditId = statusDto?.ItemAuditId,
+                        ProductId = statusDto?.ProductId ?? ProductId
+                    };
+
+                    if (ProductId == 0 && statusDto?.ProductId != null)
+                    {
+                        ProductId = statusDto.ProductId.Value;
+                    }
+
+                    ProcessStepDescription(step);
+                    Steps.Add(step);
                 }
                 
-                // Set first step as current
+                var sortedSteps = Steps.OrderBy(s => s.StepNumber).ToList();
+                Steps.Clear();
+                foreach (var s in sortedSteps) Steps.Add(s);
+
                 if (Steps.Count > 0)
                 {
-                    CurrentStepIndex = 0;
+                    _isPoAlreadyFinished = Steps.All(s => !string.IsNullOrEmpty(s.PO));
+                    var firstIncompleteIndex = Steps.ToList().FindIndex(s => !s.IsCompleted);
+                    CurrentStepIndex = firstIncompleteIndex != -1 ? firstIncompleteIndex : 0;
                 }
                 
+                UpdateStepsLockStatus();
                 OnPropertyChanged(nameof(TotalSteps));
-                NextStepCommand?.NotifyCanExecuteChanged();
-                PreviousStepCommand?.NotifyCanExecuteChanged();
             }
             catch (Exception ex)
             {
-                // FALLBACK: Load Sample Data if API fails (for testing/demo)
-                LoadSampleData();
-                ErrorMessage = $"Không thể kết nối API ({ex.Message}). Đang hiển thị dữ liệu mẫu.";
-                HasError = false; 
-                MessageBox.Show($"Không thể kết nối API: {ex.Message}.\nĐang hiển thị dữ liệu mẫu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                Log.Error(ex, "Error loading assembly items for {ProductName}", productName);
+                ErrorMessage = $"Lỗi khi tải dữ liệu: {ex.Message}";
             }
             finally
             {
@@ -291,176 +170,95 @@ namespace Navi_UI_WPF.ViewModels
             }
         }
 
-        private void LoadSampleData()
+        protected override async Task RecordStepHistoryAsync(bool isOk = false, bool isNg = false, string note = null)
         {
-            ProductId = 999;
-            ProductName = "LX15(all) - Cụm Lắp Ráp Mẫu";
-            Description = "Hướng dẫn lắp ráp bộ phận đường sắt mẫu (Sample Data)";
-            CreatedDate = DateTime.Now;
-            UpdatedDate = DateTime.Now;
+            if (CurrentStep == null || string.IsNullOrEmpty(PoNumber)) return;
+            if (_isPoAlreadyFinished) return;
 
-            Steps.Clear();
-            
-            // Using placeholder images for demonstration
-            Steps.Add(new AssemblyStepViewModel
+            try
             {
-                Id = 1,
-                Description = "Chuẩn bị Jig và các linh kiện cần thiết. Kiểm tra sạch sẽ bề mặt làm việc.",
-                Note = "Đảm bảo Jig không bị dính dầu mỡ.",
-                Images = "https://placehold.co/800x600/png?text=B1+Chuan+Bi", 
-                Type = "Preparation",
-                IsCompleted = true,
-                IsCurrent = false,
-                StepNumber = 1
-            });
-
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 2,
-                Description = "Gá Rail lên Jig. Chú ý hướng lắp ráp theo chiều mũi tên trên Jig.",
-                Images = "https://placehold.co/800x600/png?text=B2+Ga+Rail",
-                Type = "Assembly",
-                IsCompleted = true,
-                IsCurrent = false,
-                StepNumber = 2
-            });
-
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 3,
-                Description = "Gắn Retuncap vào hai đầu Rail. Đảm bảo khớp nối khít, không bị hở.",
-                Note = "Kiểm tra kỹ lưỡng khớp nối.",
-                Images = "https://placehold.co/800x600/png?text=B3+Gan+Retuncap", 
-                Type = "Assembly",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 3
-            });
-
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 4,
-                Description = "Siết ốc cố định Retuncap. Sử dụng ốc M1.7x6. Siết lực vừa đủ.",
-                Bolts = "M1.7x6 (4 cái)",
-                Force = "100 cN.m",
-                Images = "https://placehold.co/800x600/png?text=B4+Siet+Oc",
-                Type = "Fastening",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 4
-            });
-
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 5,
-                Description = "Kiểm tra hoạt động trượt của Block trên Rail. Phải trượt êm, không bị kẹt.",
-                Note = "Nếu bị kẹt, tháo ra kiểm tra lại bước 3.",
-                Images = "https://placehold.co/800x600/png?text=B5+Kiem+Tra",
-                Type = "Inspection",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 5
-            });
-            
-            Steps.Add(new AssemblyStepViewModel
-            {
-                Id = 6,
-                Description = "Dán tem bảo hành và mã sản phẩm lên mặt dưới của Block.",
-                Images = "https://placehold.co/800x600/png?text=B6+Dan+Tem",
-                Type = "Finishing",
-                IsCompleted = false,
-                IsCurrent = false,
-                StepNumber = 6
-            });
-
-            // Set current step to the first incomplete step
-            CurrentStepIndex = 2; // Step 3
-            
-            // Notify UI of changes
-            OnPropertyChanged(nameof(TotalSteps));
-            OnPropertyChanged(nameof(CompletedStepsCount));
-            OnPropertyChanged(nameof(ProgressPercentage));
-            
-            NextStepCommand?.NotifyCanExecuteChanged();
-            PreviousStepCommand?.NotifyCanExecuteChanged();
-        }
-
-        private void UpdateCurrentStep()
-        {
-            // Reset all steps
-            foreach (var step in Steps)
-            {
-                step.IsCurrent = false;
-            }
-            
-            // Set current step
-            if (CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count)
-            {
-                CurrentStep = Steps[CurrentStepIndex];
-                CurrentStep.IsCurrent = true;
-            }
-        }
-
-        private bool CanGoNext()
-        {
-            return CurrentStepIndex < TotalSteps - 1;
-        }
-
-        private void NextStep()
-        {
-            if (CanGoNext())
-            {
-                CurrentStepIndex++;
-            }
-        }
-
-        private bool CanGoPrevious()
-        {
-            return CurrentStepIndex > 0;
-        }
-
-        private void PreviousStep()
-        {
-            if (CanGoPrevious())
-            {
-                CurrentStepIndex--;
-            }
-        }
-
-        private void JumpToStep(AssemblyStepViewModel step)
-        {
-            if (step != null)
-            {
-                var index = Steps.IndexOf(step);
-                if (index >= 0)
+                var user = SessionManager.Instance.CurrentUser;
+                var dto = new CreateNaviHistoryDto
                 {
-                    CurrentStepIndex = index;
+                    PO = PoNumber,
+                    Step = CurrentStep.StepNumber,
+                    ProductName = ProductName,
+                    CodeNV = user?.UserId ?? "Unknown",
+                    NameNV = user?.UserName ?? "Unknown",
+                    Device = _deviceService.GetDeviceInfo(),
+                    ItemId = CurrentStep.Id,
+                    ItemAuditId = CurrentStep.ItemAuditId,
+                    ProductId = (CurrentStep.ProductId != null && CurrentStep.ProductId != 0) 
+                                ? CurrentStep.ProductId 
+                                : (ProductId != 0 ? (int?)ProductId : null),
+                    Type = GetHistoryType(CurrentStep),
+                    OK = isOk || (CurrentStep.IsCompleted),
+                    NG = isNg || (CurrentStep.IsNg),
+                    Note = note ?? CurrentStep.HistoryNote,
+                    Count = 1
+                };
+
+                await _historyService.CreateHistoryNaviAsync(dto);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error recording history for step {Step}", CurrentStep?.StepNumber);
+            }
+        }
+
+        protected override void ClearAssemblyData()
+        {
+            base.ClearAssemblyData();
+            Phcd = string.Empty;
+            Phtx = string.Empty;
+            ManufaComments = string.Empty;
+        }
+
+        #endregion
+
+        #region Methods riêng
+
+        private async Task SearchPoAsync()
+        {
+            if (string.IsNullOrWhiteSpace(PoNumber)) return;
+             
+            ManufaComments = string.Empty;
+            Phtx = string.Empty;
+            Phcd = string.Empty;
+
+            try 
+            {
+                IsLoading = true;
+
+                var manufaData = await _manufaService.GetAssistByPOAsync(PoNumber);
+                if (manufaData == null)
+                {
+                    System.Windows.MessageBox.Show($"PO không tồn tại.", "Thông báo", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                    PoNumber = null;
+                    return;
+                }
+
+                if (manufaData != null)
+                {
+                    await LoadProductAssemblyAsync(manufaData.Phtx, PoNumber);
+                    ManufaComments = _manufaService.GetConcatenatedComments(manufaData);
+                    Phtx = manufaData.Phtx;
+                    Phcd = manufaData.Phcd;
                 }
             }
-        }
-
-        private bool FilterSteps(object item)
-        {
-            if (string.IsNullOrWhiteSpace(SearchText)) return true;
-            if (item is AssemblyStepViewModel step)
+            catch (Exception ex)
             {
-                return (step.Description?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (step.Note?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (step.StepNumber.ToString().Contains(SearchText));
+                Log.Error(ex, "Error in SearchPoAsync");
+                ErrorMessage = $"Lỗi khi tìm kiếm PO: {ex.Message}";
+                System.Windows.MessageBox.Show($"PO không tồn tại.", "Thông báo", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             }
-            return false;
-        }
-
-        private void ToggleCurrentStepCompletion()
-        {
-            if (CurrentStep != null)
+            finally
             {
-                CurrentStep.IsCompleted = !CurrentStep.IsCompleted;
-                OnPropertyChanged(nameof(CompletedStepsCount));
-                OnPropertyChanged(nameof(ProgressPercentage));
+                IsLoading = false;
             }
         }
 
         #endregion
     }
 }
+

@@ -50,7 +50,12 @@
     <Reference Include="System.Xml"/>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Repositories\ManufaRepository.cs" />
+    <Compile Include="Repositories\NaviHistoryRepository.cs" />
     <Compile Include="Repositories\ProductAssemblyRepository.cs" />
+    <Compile Include="Repositories\NaviItemAuditRepository.cs" />
+    <Compile Include="Repositories\NaviFgRepository.cs" />
+    <Compile Include="Repositories\NaviProductMasterRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

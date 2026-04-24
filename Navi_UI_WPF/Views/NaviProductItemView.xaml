@@ -8,9 +8,6 @@
              mc:Ignorable="d"
              d:DesignHeight="750" d:DesignWidth="1100"
              Background="{StaticResource BackgroundBrush}">
-    <UserControl.DataContext>
-        <vm:NaviProductItemViewModel/>
-    </UserControl.DataContext>
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>

@@ -15,7 +15,7 @@ namespace Navi_UI_WPF.Services
     /// Base URL: http://192.168.100.100
     /// Dùng DataContractJsonSerializer (built-in .NET 4.7.2, không cần NuGet package).
     /// </summary>
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private static readonly HttpClient _httpClient = new HttpClient
         {

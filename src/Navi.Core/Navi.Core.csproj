@@ -56,9 +56,20 @@
     <Compile Include="Enums\StepType.cs" />
     <Compile Include="Exceptions\ApiException.cs" />
     <Compile Include="Exceptions\ProcessNotFoundException.cs" />
-    <Compile Include="Interfaces\IProcessService.cs" />
+    <Compile Include="Entities\NaviHistory.cs" />
+    <Compile Include="Entities\ManufaAssist.cs" />
+    <Compile Include="Interfaces\IManufaRepository.cs" />
+    <Compile Include="Interfaces\INaviHistoryRepository.cs" />
     <Compile Include="Interfaces\IProductAssemblyRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Entities\NaviProductMasterItem.cs" />
+    <Compile Include="Entities\NaviItemAudit.cs" />
+    <Compile Include="Entities\NaviFg.cs" />
+    <Compile Include="Entities\NaviProductMaster.cs" />
+    <Compile Include="Entities\NaviHistoryAuditComparison.cs" />
+    <Compile Include="Interfaces\INaviItemAuditRepository.cs" />
+    <Compile Include="Interfaces\INaviFgRepository.cs" />
+    <Compile Include="Interfaces\INaviProductMasterRepository.cs" />
   </ItemGroup>
 
   <ItemGroup>

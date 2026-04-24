@@ -79,6 +79,22 @@ namespace Navi.Application.Services
             return await SendAsync<List<NaviItemDto>>(req);
         }
 
+        public async Task<List<NaviItemDto>> GetByProductMasterNameAsync(string productName)
+        {
+            var url = string.Format(ApiEndpoints.NaviItemsByProductMasterName, Uri.EscapeDataString(productName));
+            var req = new HttpRequestMessage(HttpMethod.Get, url);
+            return await SendAsync<List<NaviItemDto>>(req);
+        }
+
+        public async Task<List<NaviItemStatusDto>> GetWithHistoryStatusAsync(string productName, string po)
+        {
+            var url = string.Format(ApiEndpoints.NaviItemsWithHistoryStatus, 
+                Uri.EscapeDataString(productName ?? ""), 
+                Uri.EscapeDataString(po ?? ""));
+            var req = new HttpRequestMessage(HttpMethod.Get, url);
+            return await SendAsync<List<NaviItemStatusDto>>(req);
+        }
+
         public async Task<NaviItemDto> CreateAsync(CreateNaviItemDto dto)
         {
             var req = new HttpRequestMessage(HttpMethod.Post, ApiEndpoints.NaviItems)

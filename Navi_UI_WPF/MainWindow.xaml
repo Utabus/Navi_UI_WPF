@@ -5,6 +5,7 @@
     xmlns:conv="clr-namespace:Navi_UI_WPF.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Navi_UI_WPF"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:Navi_UI_WPF.Views"
     xmlns:vm="clr-namespace:Navi_UI_WPF.ViewModels"
@@ -16,35 +17,35 @@
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
 
-        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-            <views:HomeView />
+        <!--<DataTemplate DataType="{x:Type vm:HomeViewModel}">
+        <views:HomeView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ProductAssemblyViewModel}">
-            <views:ProductAssemblyView />
+        <views:ProductAssemblyView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NaviProductViewModel}">
-            <views:NaviProductView />
+        <views:NaviProductView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NaviItemViewModel}">
-            <views:NaviItemView />
+        <views:NaviItemView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NaviProductItemViewModel}">
-            <views:NaviProductItemView />
+        <views:NaviProductItemView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NaviHistoryViewModel}">
-            <views:NaviHistoryView />
+        <views:NaviHistoryView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ForceGaugeViewModel}">
-            <views:ForceGaugeView />
+        <views:ForceGaugeView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:InsertBallViewModel}">
-            <views:InsertBallView />
-        </DataTemplate>
+        <views:InsertBallView />
+        </DataTemplate>-->
     </Window.Resources>
 
-    <Window.DataContext>
-        <vm:MainViewModel />
-    </Window.DataContext>
+    <!--<Window.DataContext>
+    <vm:MainViewModel />
+    </Window.DataContext>-->
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -136,114 +137,114 @@
                 <!--  Menu Items  -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
-                    <StackPanel.Resources>
-                        <Style BasedOn="{StaticResource {x:Type RadioButton}}" TargetType="RadioButton">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="Foreground" Value="White" />
-                            <Setter Property="FontSize" Value="14" />
-                            <Setter Property="Padding" Value="10" />
-                            <Setter Property="Margin" Value="0,0,0,5" />
-                            <Setter Property="Cursor" Value="Hand" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="RadioButton">
-                                        <Border Padding="15,10" Background="{TemplateBinding Background}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <ContentPresenter
-                                                    Grid.Column="0"
-                                                    Width="24"
-                                                    HorizontalAlignment="Center"
-                                                    Content="{TemplateBinding Tag}" />
-                                                <ContentPresenter
-                                                    Grid.Column="1"
-                                                    Margin="15,0,0,0"
-                                                    Content="{TemplateBinding Content}"
-                                                    Visibility="{Binding DataContext.IsMenuOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
-                                            </Grid>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#1E88E5" />
-                                            </Trigger>
-                                            <Trigger Property="IsChecked" Value="True">
-                                                <Setter Property="Background" Value="#0D47A1" />
-                                                <Setter Property="FontWeight" Value="Bold" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </StackPanel.Resources>
+                        <StackPanel.Resources>
+                            <Style BasedOn="{StaticResource {x:Type RadioButton}}" TargetType="RadioButton">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="FontSize" Value="14" />
+                                <Setter Property="Padding" Value="10" />
+                                <Setter Property="Margin" Value="0,0,0,5" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border Padding="15,10" Background="{TemplateBinding Background}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <ContentPresenter
+                                                        Grid.Column="0"
+                                                        Width="24"
+                                                        HorizontalAlignment="Center"
+                                                        Content="{TemplateBinding Tag}" />
+                                                    <ContentPresenter
+                                                        Grid.Column="1"
+                                                        Margin="15,0,0,0"
+                                                        Content="{TemplateBinding Content}"
+                                                        Visibility="{Binding DataContext.IsMenuOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#1E88E5" />
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="Background" Value="#0D47A1" />
+                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
 
-                    <RadioButton
-                        Command="{Binding NavigateToHomeCommand}"
-                        Content="Trang Chủ"
-                        IsChecked="True"
-                        Tag="🏠" />
+                        <RadioButton
+                            Command="{Binding NavigateToHomeCommand}"
+                            Content="Trang Chủ"
+                            IsChecked="True"
+                            Tag="🏠" />
 
-                    <RadioButton
-                        Command="{Binding NavigateToAssemblyCommand}"
-                        Content="Lắp Ráp Sản Phẩm"
-                        Tag="📦" />
-                    <RadioButton
-                        Command="{Binding NavigateToAssemblyCommand}"
-                        Content="Inspection"
-                        Tag="📦" />
-                    <RadioButton
-                        Command="{Binding NavigateToAssemblyCommand}"
-                        Content="Packing"
-                        Tag="📦" />
+                        <RadioButton
+                            Command="{Binding NavigateToAssemblyCommand}"
+                            Content="Assembly"
+                            Tag="📦" />
+                        <RadioButton
+                            Command="{Binding NavigateToInspectionCommand}"
+                            Content="Inspection"
+                            Tag="📦" />
+                        <RadioButton
+                            Command="{Binding NavigateToPackingCommand}"
+                            Content="Packing"
+                            Tag="📦" />
 
-                    <!--  SubLeader+ only: Quản lý Sản phẩm  -->
-                    <RadioButton
-                        Command="{Binding NavigateToProductCommand}"
-                        Content="Quản lý Sản phẩm"
-                        Tag="🗂️"
-                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
+                        <!--  SubLeader+ only: Quản lý Sản phẩm  -->
+                        <RadioButton
+                            Command="{Binding NavigateToProductCommand}"
+                            Content="Quản lý Sản phẩm"
+                            Tag="🗂️"
+                            Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
-                    <!--  SubLeader+ only: Bước lắp ráp  -->
-                    <RadioButton
-                        Command="{Binding NavigateToItemCommand}"
-                        Content="Bước lắp ráp"
-                        Tag="🔧"
-                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
+                        <!--  SubLeader+ only: Bước lắp ráp  -->
+                        <RadioButton
+                            Command="{Binding NavigateToItemCommand}"
+                            Content="Bước lắp ráp"
+                            Tag="🔧"
+                            Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
-                    <!--  SubLeader+ only: Liên kết SP-Bước  -->
-                    <RadioButton
-                        Command="{Binding NavigateToProductItemCommand}"
-                        Content="Liên kết SP-Bước"
-                        Tag="🔗"
-                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
+                        <!--  SubLeader+ only: Liên kết SP-Bước  -->
+                        <RadioButton
+                            Command="{Binding NavigateToProductItemCommand}"
+                            Content="Liên kết SP-Bước"
+                            Tag="🔗"
+                            Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
-                    <!--  SubLeader+ only: Lịch sử thao tác  -->
-                    <RadioButton
-                        Command="{Binding NavigateToHistoryCommand}"
-                        Content="Lịch sử thao tác"
-                        Tag="📋"
-                        Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
+                        <!--  SubLeader+ only: Lịch sử thao tác  -->
+                        <RadioButton
+                            Command="{Binding NavigateToHistoryCommand}"
+                            Content="Lịch sử thao tác"
+                            Tag="📋"
+                            Visibility="{Binding IsFullAccess, Converter={StaticResource BoolToVisibility}}" />
 
-                    <!--  Tất cả: Force Gauge  -->
-                    <RadioButton
-                        Command="{Binding NavigateToForceGaugeCommand}"
-                        Content="Force Gauge"
-                        Tag="📈" />
+                        <!--  Tất cả: Force Gauge  -->
+                        <RadioButton
+                            Command="{Binding NavigateToForceGaugeCommand}"
+                            Content="Force Gauge"
+                            Tag="📈" />
 
-                    <RadioButton
-                        Command="{Binding NavigateToInsertBallCommand}"
-                        Content="Insert Ball"
-                        Tag="🔵" />
+                        <RadioButton
+                            Command="{Binding NavigateToInsertBallCommand}"
+                            Content="Insert Ball"
+                            Tag="🔵" />
 
-                    <RadioButton Content="RS232" Tag="⚙️" />
-                    <!--  Tất cả: Cài Đặt  -->
-                    <RadioButton Content="Cài Đặt" Tag="⚙️" />
+                        <RadioButton Content="RS232" Tag="⚙️" />
+                        <!--  Tất cả: Cài Đặt  -->
+                        <RadioButton Content="Cài Đặt" Tag="⚙️" />
 
-                    <!--  Tất cả: Trợ Giúp  -->
-                    <RadioButton Content="Trợ Giúp" Tag="❓" />
+                        <!--  Tất cả: Trợ Giúp  -->
+                        <RadioButton Content="Trợ Giúp" Tag="❓" />
                     </StackPanel>
                 </ScrollViewer>
 
@@ -340,5 +341,10 @@
 
         <!--  Content Area  -->
         <ContentControl Grid.Column="1" Content="{Binding CurrentView}" />
+
+        <!--  Growl Container  -->
+        <ScrollViewer Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" IsHitTestVisible="False" VerticalScrollBarVisibility="Hidden">
+            <StackPanel hc:Growl.Token="MainGrowl" VerticalAlignment="Top"/>
+        </ScrollViewer>
     </Grid>
 </Window>

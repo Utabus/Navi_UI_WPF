@@ -18,9 +18,19 @@ Ensure new code is placed in the correct directories:
 - `src/Navi.Application/` & `src/Navi.Core/`: Application logic and core domain entities.
 
 ## 3. General Principles
-- **Clean Architecture:** Keep UI logic purely in `Navi_UI_WPF`. Business logic and data access must reside in `Navi.Infrastructure`, `Navi.Application`, or `Navi.Core`.
-- **API Integration:** The backend uses standard REST APIs (`/api/{controller}`). All API calls should be encapsulated in Repositories or Services within `Navi.Infrastructure`.
-- **Soft Delete:** Entities use `IsDelete = true`. Do not perform hard physical deletes when writing data access logic.
+
+### Layer Dependency Rules (STRICT)
+| Layer | Description | Allowed Dependencies | Forbidden Dependencies |
+| :--- | :--- | :--- | :--- |
+| **Navi.Core** | Entities, Enums, Constants, Exceptions | None (Self-contained) | **ANYTHING** internal (App, Infra, UI) |
+| **Navi.Application** | DTOs, Service Interfaces, Business Logic | `Navi.Core` | `Navi.Infrastructure`, `Navi_UI_WPF` |
+| **Navi.Infrastructure** | Repositories (HTTP Clients for API), Hardware | `Navi.Core`, `Navi.Application` | `Navi_UI_WPF` |
+| **Navi_UI_WPF** | User Interface, ViewModels, UI Services | `Navi.Application`, `Navi.Core` | `Navi.Infrastructure` |
+
+### Common Pitfalls to Avoid:
+1.  **DTOs in Interfaces in Core**: NEVER place an interface in `Navi.Core` if it returns or accepts a DTO from `Navi.Application`. Move the interface to `Navi.Application/Interfaces` instead.
+2.  **Circular References**: Ensure `Core` never references `Application`. If you need a model in Core, create an **Entity** in `Navi.Core.Entities`.
+3.  **Logging in Infrastructure**: Avoid direct references to `Serilog` in `Infrastructure` or `Core`. Use abstractions or standard `Exception` throwing for errors.
 
 ## 4. Navigation Model
 - The `MainViewModel.cs` manages navigation via a `CurrentView` property (`object`).

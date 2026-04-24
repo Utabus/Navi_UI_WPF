@@ -4,9 +4,10 @@ namespace Navi_UI_WPF.Views
 {
     public partial class NaviItemView : UserControl
     {
-        public NaviItemView()
+        public NaviItemView(ViewModels.NaviItemViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
         }
     }
 }
